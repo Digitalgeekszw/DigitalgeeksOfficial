@@ -96,7 +96,7 @@ export const feedback = [
 export const stats = [
   {
     id: "stats-1",
-    title: "Open Possitions",
+    title: "Open Positions",
     value: "50+",
   },
   {

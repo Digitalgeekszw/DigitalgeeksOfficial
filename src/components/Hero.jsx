@@ -29,7 +29,7 @@ const Hero = () => {
           <img src={discount} alt="discount" className="w-[32px] h-[32px]" />
           <p className={`${styles.paragraph} ml-2`}>
             <span className="text-white">Are</span> You A{" "}
-            <span className="text-white">Developer</span> Join DigitalGeeks
+            <span className="text-amber-400">Developer</span> Join DigitalGeeks
           </p>
         </div>
 
