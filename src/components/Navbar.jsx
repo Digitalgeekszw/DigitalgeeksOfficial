@@ -7,15 +7,10 @@ const Navbar = () => {
   const [toggle, setToggle] = useState(false);
 
   const handleContactClick = () => {
-    const emailAddress = "digitalgeekszw@gmail.com";
-    const subject = "Contact Inquiry";
-    const body = "Hello, I would like to get in touch.";
-
-    const mailtoUrl = `mailto:${emailAddress}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-
-    window.location.href = mailtoUrl;
+    const footerSection = document.getElementById("Footer");
+    if (footerSection) {
+      footerSection.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (

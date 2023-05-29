@@ -48,11 +48,11 @@ const Hero = () => {
         </h1>
         <p className={`${styles.paragraph} max-w-[470px] mt-5`}>
           At Digital Geeks, we unite a passionate community of developers to
-          create innovative solutions. With collaboration and support at our
+          create innovative solutions, With collaboration and support at our
           core, we deliver high-quality work that exceeds client expectations.
           Our goal is to empower developers to pursue their technology passions,
           making a meaningful impact on businesses. We prioritize creativity,
-          collaboration, and excellence, aiming to be the leading provider of
+          collaboration and excellence, aiming to be the leading provider of
           digital solutions that drive success.
         </p>
       </div>
