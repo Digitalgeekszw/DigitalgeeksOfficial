@@ -116,8 +116,8 @@ export const footerLinks = [
     title: "Useful Links",
     links: [
       {
-        name: "Content",
-        link: "https://www.hoobank.com/content/",
+        name: "Summarizer",
+        link: "https://summerizer-five.vercel.app/",
       },
       {
         name: "How it Works",
@@ -142,7 +142,7 @@ export const footerLinks = [
     links: [
       {
         name: "Join Community ",
-        link: "https://www.hoobank.com/help-center/",
+        link: "https://forms.office.com/r/30hbmMNd14",
       },
       {
         name: "Partners",

@@ -32,7 +32,9 @@ const Footer = () => (
                   key={link.name}
                   className={`font-poppins font-normal text-[16px] leading-[24px] text-dimWhite hover:text-amber-400 cursor-pointer ${
                     index !== footerlink.links.length - 1 ? "mb-4" : "mb-0"
-                  }`}>
+                  }`}
+                  onClick={() => window.open(link.link)} // Update the event handler here
+                >
                   {link.name}
                 </li>
               ))}
