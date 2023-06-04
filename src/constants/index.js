@@ -40,6 +40,11 @@ export const navLinks = [
     id: "Contact",
     title: "Contact",
   },
+  {
+    id: "join",
+    title: "Join Us",
+    link: "https://forms.office.com/r/30hbmMNd14",
+  },
 ];
 
 export const features = [
@@ -119,22 +124,22 @@ export const footerLinks = [
         name: "Summarizer",
         link: "https://summerizer-five.vercel.app/",
       },
-      {
-        name: "How it Works",
-        link: "https://www.hoobank.com/how-it-works/",
-      },
-      {
-        name: "Create",
-        link: "https://www.hoobank.com/create/",
-      },
-      {
-        name: "Explore",
-        link: "https://www.hoobank.com/explore/",
-      },
-      {
-        name: "Terms & Services",
-        link: "https://www.hoobank.com/terms-and-services/",
-      },
+      // {
+      //   name: "How it Works",
+      //   link: "https://www.hoobank.com/how-it-works/",
+      // },
+      // {
+      //   name: "Create",
+      //   link: "https://www.hoobank.com/create/",
+      // },
+      // {
+      //   name: "Explore",
+      //   link: "https://www.hoobank.com/explore/",
+      // },
+      // {
+      //   name: "Terms & Services",
+      //   link: "https://www.hoobank.com/terms-and-services/",
+      // },
     ],
   },
   {
@@ -144,22 +149,22 @@ export const footerLinks = [
         name: "Join Community ",
         link: "https://forms.office.com/r/30hbmMNd14",
       },
-      {
-        name: "Partners",
-        link: "https://www.hoobank.com/partners/",
-      },
-      {
-        name: "Suggestions",
-        link: "https://www.hoobank.com/suggestions/",
-      },
-      {
-        name: "Blog",
-        link: "https://www.hoobank.com/blog/",
-      },
-      {
-        name: "Newsletters",
-        link: "https://www.hoobank.com/newsletters/",
-      },
+      // {
+      //   name: "Partners",
+      //   link: "https://www.hoobank.com/partners/",
+      // },
+      // {
+      //   name: "Suggestions",
+      //   link: "https://www.hoobank.com/suggestions/",
+      // },
+      // {
+      //   name: "Blog",
+      //   link: "https://www.hoobank.com/blog/",
+      // },
+      // {
+      //   name: "Newsletters",
+      //   link: "https://www.hoobank.com/newsletters/",
+      // },
     ],
   },
   {
@@ -167,11 +172,11 @@ export const footerLinks = [
     links: [
       {
         name: "Our Partner",
-        link: "https://www.hoobank.com/our-partner/",
+        link: "https://www.linkedin.com/company/92799402",
       },
       {
         name: "Become a Partner",
-        link: "https://www.hoobank.com/become-a-partner/",
+        link: "https://www.linkedin.com/company/92799402",
       },
     ],
   },

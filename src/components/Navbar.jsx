@@ -31,7 +31,16 @@ const Navbar = () => {
                 setActive(nav.title);
               }
             }}>
-            <a href={`#${nav.id}`}>{nav.title}</a>
+            {index === navLinks.length - 1 ? (
+              <a
+                href={nav.link}
+                target="_blank"
+                className="bg-blue-500 px-6 py-3 rounded-lg text-lg text-white">
+                {nav.title}
+              </a>
+            ) : (
+              <a href={`#${nav.id}`}>{nav.title}</a>
+            )}
           </li>
         ))}
       </ul>
@@ -62,7 +71,15 @@ const Navbar = () => {
                     setActive(nav.title);
                   }
                 }}>
-                <a href={`#${nav.id}`}>{nav.title}</a>
+                {index === navLinks.length - 1 ? (
+                  <a
+                    href={nav.link}
+                    className="bg-blue-500 px-6 py-3 rounded-lg text-lg text-white">
+                    {nav.title}
+                  </a>
+                ) : (
+                  <a href={`#${nav.id}`}>{nav.title}</a>
+                )}
               </li>
             ))}
           </ul>
