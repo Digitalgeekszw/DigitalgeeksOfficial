@@ -1,3 +1,4 @@
+import React from "react";
 import { features } from "../constants";
 import styles, { layout } from "../style";
 import Button from "./Button";
@@ -22,31 +23,39 @@ const FeatureCard = ({ icon, title, content, index }) => (
   </div>
 );
 
-const Business = () => (
-  <section id="features" className={layout.section}>
-    <div className={layout.sectionInfo}>
-      <h2 className={styles.heading2}>
-        About <br className="sm:block hidden" /> DigitalGeeks
-      </h2>
-      <p className={`${styles.paragraph} max-w-[470px] mt-5`}>
-        Digital Geeks is a community of innovative developers dedicated to
-        creating exceptional digital solutions. We prioritize collaboration and
-        innovation, working closely with our clients to exceed expectations. Our
-        mission is to drive success by delivering cutting-edge technology and
-        fostering a supportive environment for our team. Together, we envision a
-        world where technology is a force for good, empowering businesses and
-        creating a brighter future for all.
-      </p>
+const Business = () => {
+  const openPDF = () => {
+    window.open("/About.pdf", "_blank");
+  };
 
-      <Button styles={`mt-10`} />
-    </div>
+  return (
+    <section id="features" className={layout.section}>
+      <div className={layout.sectionInfo}>
+        <h2 className={styles.heading2}>
+          About <br className="sm:block hidden" /> DigitalGeeks
+        </h2>
+        <p className={`${styles.paragraph} max-w-[470px] mt-5`}>
+          Digital Geeks is a community of innovative developers dedicated to
+          creating exceptional digital solutions. We prioritize collaboration
+          and innovation, working closely with our clients to exceed
+          expectations. Our mission is to drive success by delivering
+          cutting-edge technology and fostering a supportive environment for our
+          team. Together, we envision a world where technology is a force for
+          good, empowering businesses and creating a brighter future for all.
+        </p>
 
-    <div className={`${layout.sectionImg} flex-col`}>
-      {features.map((feature, index) => (
-        <FeatureCard key={feature.id} {...feature} index={index} />
-      ))}
-    </div>
-  </section>
-);
+        <Button styles={`mt-10`} onClick={openPDF}>
+          More about
+        </Button>
+      </div>
+
+      <div className={`${layout.sectionImg} flex-col`}>
+        {features.map((feature, index) => (
+          <FeatureCard key={feature.id} {...feature} index={index} />
+        ))}
+      </div>
+    </section>
+  );
+};
 
 export default Business;

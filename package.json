@@ -13,10 +13,12 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.9.0",
     "react-intersection-observer": "^9.4.3",
+    "react-pdf": "^7.0.3",
     "react-router-dom": "^6.11.2",
     "react-youtube": "^10.1.0"
   },
   "devDependencies": {
+    "@react-pdf-viewer/core": "^3.12.0",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.0.0",

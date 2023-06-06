@@ -37,7 +37,7 @@ const CardDeal = () => {
           that thrives on creativity and excellence.
         </p>
 
-        <Button styles={`mt-10`} />
+        {/* <Button styles={`mt-10`}>About</Button> */}
       </div>
 
       <div className={layout.sectionImg} ref={ref}>
