@@ -21,11 +21,11 @@ export const navLinks = [
     title: "Home",
   },
   {
-    id: "features",
+    id: "About",
     title: "About Us",
   },
   {
-    id: "product",
+    id: "Services",
     title: "Services",
   },
   {
@@ -38,7 +38,7 @@ export const navLinks = [
   },
   {
     id: "Contact",
-    title: "Contact",
+    title: "Contact Us",
   },
   {
     id: "join",

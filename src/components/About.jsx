@@ -23,13 +23,13 @@ const FeatureCard = ({ icon, title, content, index }) => (
   </div>
 );
 
-const Business = () => {
+const About = () => {
   const openPDF = () => {
     window.open("/About.pdf", "_blank");
   };
 
   return (
-    <section id="features" className={layout.section}>
+    <section id="About" className={layout.section}>
       <div className={layout.sectionInfo}>
         <h2 className={styles.heading2}>
           About <br className="sm:block hidden" /> DigitalGeeks
@@ -58,4 +58,4 @@ const Business = () => {
   );
 };
 
-export default Business;
+export default About;
