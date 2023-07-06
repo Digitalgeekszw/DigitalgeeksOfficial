@@ -126,7 +126,7 @@ export const footerLinks = [
       },
       {
         name: "Branding Guideline",
-        link: "https://publuu.com/flip-book/181271/445286/page/1",
+        link: "https://publuu.com/flip-book/181271/445916/page/1",
       },
       // {
       //   name: "Create",
