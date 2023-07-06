@@ -124,10 +124,10 @@ export const footerLinks = [
         name: "Summarizer",
         link: "https://summerizer-five.vercel.app/",
       },
-      // {
-      //   name: "How it Works",
-      //   link: "https://www.hoobank.com/how-it-works/",
-      // },
+      {
+        name: "Branding Guideline",
+        link: "https://publuu.com/flip-book/181271/445286/page/1",
+      },
       // {
       //   name: "Create",
       //   link: "https://www.hoobank.com/create/",
