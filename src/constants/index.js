@@ -43,7 +43,7 @@ export const navLinks = [
   {
     id: "join",
     title: "Join Us",
-    link: "https://forms.office.com/r/30hbmMNd14",
+    link: "https://job-portal-ten-ashy.vercel.app/",
   },
 ];
 
@@ -147,12 +147,12 @@ export const footerLinks = [
     links: [
       {
         name: "Join Community ",
-        link: "https://forms.office.com/r/30hbmMNd14",
+        link: "https://job-portal-ten-ashy.vercel.app/",
       },
-      // {
-      //   name: "Partners",
-      //   link: "https://www.hoobank.com/partners/",
-      // },
+      {
+        name: "Careers",
+        link: "https://job-portal-ten-ashy.vercel.app/",
+      },
       // {
       //   name: "Suggestions",
       //   link: "https://www.hoobank.com/suggestions/",
@@ -186,7 +186,7 @@ export const socialMedia = [
   {
     id: "social-media-1",
     icon: instagram,
-    link: "https://www.instagram.com/",
+    link: "https://www.instagram.com/digitalgeeksz",
   },
   {
     id: "social-media-2",
@@ -196,7 +196,7 @@ export const socialMedia = [
   {
     id: "social-media-3",
     icon: twitter,
-    link: "https://www.twitter.com/",
+    link: "https://x.com/digitalgeeksz?s=21&t=ifzqj6IyGCX-PgD6NPgBKQ",
   },
   {
     id: "social-media-4",
