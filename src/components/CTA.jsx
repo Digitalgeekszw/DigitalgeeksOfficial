@@ -18,15 +18,14 @@ const CTA = () => {
   };
 
   return (
-    <section
-      className={`${styles.flexCenter}  ${styles.padding} sm:flex-col flex-row bg-black-gradient-2 rounded-[20px] box-shadow items-center justify-center`}
-    >
-      <Card isFooterBlurred className="  h-[700px] col-span-12 sm:col-span-7">
+    // <section
+    //   className={`${styles.flexCenter}  ${styles.padding} sm:flex-col flex-row bg-black-gradient-2 rounded-[20px] box-shadow items-center justify-center`}
+    // >
+    <div id="#Tech-talk">
+      <Card isFooterBlurred className=" sm:h-[700px] col-span-12 sm:col-span-7">
         <CardHeader className="absolute z-10 top-1 flex-col items-end">
           <p className="text-tiny text-white uppercase font-bold">Online</p>
-          <h4 className="text-white font-medium text-xl">
-            Knowledge is power.
-          </h4>
+          <h4 className="text-white font-medium text-xl">Tech Talk Fridays</h4>
         </CardHeader>
         <Image
           removeWrapper
@@ -64,7 +63,8 @@ const CTA = () => {
           </Button>
         </CardFooter>
       </Card>
-    </section>
+    </div>
+    // </section>
   );
 };
 
