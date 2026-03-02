@@ -19,26 +19,32 @@ export const navLinks = [
   {
     id: "home",
     title: "Home",
+    link: "/",
   },
   {
-    id: "About",
+    id: "about",
     title: "About Us",
+    link: "/about",
   },
   {
-    id: "Services",
+    id: "services",
     title: "Services",
+    link: "/services",
   },
   {
-    id: "Community",
+    id: "community",
     title: "Community and Culture",
+    link: "/community",
   },
   {
-    id: "clients",
+    id: "team",
     title: "Our Team",
+    link: "/team",
   },
   {
-    id: "Contact",
+    id: "contact",
     title: "Contact Us",
+    link: "/contact",
   },
   {
     id: "join",

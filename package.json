@@ -1,35 +1,33 @@
 {
-  "name": "DigitalGeeks",
+  "name": "digitalgeeks",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "0.1.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@nextui-org/react": "^2.1.13",
+    "eslint": "^9.39.3",
+    "eslint-config-next": "^16.1.6",
     "framer-motion": "^10.16.4",
     "glob-parent": "^5.1.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "next": "^16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "react-icons": "^4.9.0",
     "react-intersection-observer": "^9.4.3",
     "react-pdf": "^7.0.3",
-    "react-router-dom": "^6.11.2",
     "react-spring": "^9.7.1",
     "react-typewriter-effect": "^1.1.0",
     "react-youtube": "^10.1.0"
   },
   "devDependencies": {
     "@react-pdf-viewer/core": "^3.12.0",
-    "@types/react": "^18.0.15",
-    "@types/react-dom": "^18.0.6",
-    "@vitejs/plugin-react": "^2.0.0",
     "autoprefixer": "^10.4.7",
     "postcss": "^8.4.14",
-    "tailwindcss": "^3.3.2",
-    "vite": "^3.0.0"
+    "tailwindcss": "^3.3.2"
   }
 }
