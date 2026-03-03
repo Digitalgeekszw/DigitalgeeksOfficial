@@ -5,6 +5,7 @@ import { navLinks } from "../constants";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
   const pathname = usePathname();
