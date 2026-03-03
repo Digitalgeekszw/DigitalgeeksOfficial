@@ -19,7 +19,7 @@ const Footer = () => (
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-10 border-b border-slate-200">
         <div className="flex items-center gap-4 mb-6 md:mb-0">
           <Link href="/">
-            <img src="/logo.png" alt="DigitalGeeks" className="w-[180px] h-auto object-contain cursor-pointer opacity-90 hover:opacity-100 transition-opacity" />
+            <img src="/logo.png" alt="DigitalGeeks" className="w-[140px] sm:w-[180px] h-auto object-contain cursor-pointer opacity-90 hover:opacity-100 transition-opacity" />
           </Link>
           <span className="hidden sm:inline-block text-[14px] ml-4 pl-4 border-l border-slate-200 text-slate-500">
             Empowering innovation through collaboration.

@@ -231,7 +231,7 @@ const Services = () => {
 
       {/* ── Section Header ────────────────────────────────────────────── */}
       <div className="max-w-[1400px] mx-auto px-6 sm:px-16 pt-16 pb-10 text-center">
-        <h2 className="font-poppins font-extrabold text-[36px] sm:text-[48px] text-slate-900 leading-tight tracking-tight mb-4">
+        <h2 className="font-poppins font-extrabold text-[32px] ss:text-[36px] sm:text-[48px] text-slate-900 leading-tight tracking-tight mb-4">
           Our <span className="text-blue-600">Services</span>
         </h2>
         <p className="font-poppins text-slate-500 text-[18px] max-w-2xl mx-auto leading-relaxed">

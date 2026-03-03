@@ -92,7 +92,7 @@ const About = () => {
               <span className="font-poppins font-medium text-sm text-slate-700 tracking-wide">Who we are</span>
             </div>
 
-            <h2 className="font-poppins font-bold text-[40px] sm:text-[54px] text-slate-900 leading-[1.05] tracking-tighter mb-6">
+            <h2 className="font-poppins font-bold text-[32px] ss:text-[40px] sm:text-[54px] text-slate-900 leading-[1.1] sm:leading-[1.05] tracking-tighter mb-6">
               Building the{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
                 future

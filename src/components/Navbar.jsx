@@ -39,8 +39,8 @@ const Navbar = () => {
     >
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="DigitalGeeks Logo" className="w-[40px] h-auto object-contain opacity-90 rounded-md" />
-          <span className="font-poppins font-bold text-xl text-slate-800 hidden sm:block tracking-tight">
+          <img src="/logo.png" alt="DigitalGeeks Logo" className="w-[32px] sm:w-[40px] h-auto object-contain opacity-90 rounded-md" />
+          <span className="font-poppins font-bold text-lg sm:text-xl text-slate-800 hidden ss:block tracking-tight">
             DigitalGeeks
           </span>
         </Link>
@@ -89,7 +89,7 @@ const Navbar = () => {
         <div
           className={`${
             !toggle ? "hidden" : "flex"
-          } p-6 bg-white absolute top-20 right-0 mx-4 my-2 min-w-[200px] rounded-xl shadow-lg sidebar border border-slate-100`}>
+          } p-6 bg-white absolute top-16 right-0 mx-2 my-2 min-w-[180px] rounded-xl shadow-xl sidebar border border-slate-100`}>
           <ul className="list-none flex justify-end items-start flex-1 flex-col">
             {navLinks.map((nav, index) => (
               <li

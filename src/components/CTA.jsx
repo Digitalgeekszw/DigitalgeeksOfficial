@@ -27,7 +27,7 @@ const CTA = () => {
             </span>
           </div>
           
-          <h2 className="font-poppins font-bold text-[40px] sm:text-[56px] text-slate-900 leading-[1.1] tracking-tight mb-6">
+          <h2 className="font-poppins font-bold text-[32px] ss:text-[40px] sm:text-[56px] text-slate-900 leading-[1.1] tracking-tight mb-6">
             Ready to build <br className="hidden sm:block"/>
             <span className="text-secondary bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">the future?</span>
           </h2>

@@ -39,7 +39,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="font-poppins font-semibold text-[50px] sm:text-[70px] md:text-[85px] text-slate-900 leading-[1.05] tracking-tight max-w-4xl"
+          className="font-poppins font-semibold text-[40px] ss:text-[50px] sm:text-[70px] md:text-[85px] text-slate-900 leading-[1.1] sm:leading-[1.05] tracking-tight max-w-4xl"
         >
           The next generation <br className="hidden md:block"/>
           <span className="text-secondary bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">digital workspace.</span>
