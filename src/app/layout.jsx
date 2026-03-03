@@ -1,6 +1,20 @@
 import "../index.css";
 import { Providers } from "./providers";
 import Script from "next/script";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export const metadata = {
   title: "DigitalGeeksz",
@@ -15,7 +29,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`${inter.variable} ${plusJakartaSans.variable} dark`}>
       <head>
         <link rel="icon" type="image/ico" href="/Icon.ico" />
         <meta name="theme-color" content="#000000" />

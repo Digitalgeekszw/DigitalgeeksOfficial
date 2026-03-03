@@ -70,16 +70,19 @@ const Hero = () => {
         </motion.div>
       </div>
 
-      {/* Video product representation */}
+      {/* Video product representation with improved mobile presence */}
       <motion.div 
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.5 }}
-        className="relative z-10 w-full max-w-[1200px] mx-auto mt-20 sm:mt-24 px-6 sm:px-0 mb-12"
+        className="relative z-10 w-full max-w-[1240px] mx-auto mt-16 sm:mt-24 px-4 sm:px-12 mb-12"
       >
-        <div className="w-full flex justify-center">
+        <div className="relative group">
+          {/* subtle glow behind video */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 to-blue-400/20 rounded-[32px] blur-2xl opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+          
           <video 
-            className="w-full rounded-[24px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] object-cover aspect-video border border-slate-200/60"
+            className="w-full rounded-[24px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] object-cover aspect-video border border-slate-200/60 relative z-10"
             autoPlay 
             loop 
             muted 

@@ -17,7 +17,13 @@ const FeatureCard = ({ icon: Icon, title, content, index }) => (
       {typeof Icon === 'function' ? (
         <Icon className="w-8 h-8" />
       ) : (
-        <img src={Icon} alt={title} className="w-[50%] h-[50%] object-contain filter invert opacity-80" />
+        <Image 
+          src={Icon} 
+          alt={title} 
+          width={32}
+          height={32}
+          className="w-[50%] h-[50%] object-contain filter invert opacity-80" 
+        />
       )}
     </div>
     <h4 className="font-poppins font-semibold text-slate-900 text-2xl tracking-tight mb-4">

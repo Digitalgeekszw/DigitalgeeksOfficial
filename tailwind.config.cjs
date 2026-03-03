@@ -32,8 +32,10 @@ module.exports = {
         },
       },
       fontFamily: {
-        poppins: ["Inter", "sans-serif"], // Reusing the poppins class but mapping to Inter for less refactoring
-        sans: ["Inter", "sans-serif"],
+        poppins: ["var(--font-inter)", "sans-serif"], 
+        sans: ["var(--font-inter)", "sans-serif"],
+        google: ["var(--font-inter)", "sans-serif"], // Fallback if font-google is used
+        jakarta: ["var(--font-plus-jakarta)", "sans-serif"],
       },
       animation: {
         shimmer: "shimmer 1.5s infinite linear",

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { navLinks } from "../constants";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiMenu, FiX } from "react-icons/fi";
+import Image from "next/image";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -39,7 +39,13 @@ const Navbar = () => {
     >
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="DigitalGeeks Logo" className="w-[32px] sm:w-[40px] h-auto object-contain opacity-90 rounded-md" />
+          <Image 
+            src="/logo.png" 
+            alt="DigitalGeeks Logo" 
+            width={40}
+            height={40}
+            className="w-[32px] sm:w-[40px] h-auto object-contain opacity-90 rounded-md" 
+          />
           <span className="font-poppins font-bold text-lg sm:text-xl text-slate-800 hidden ss:block tracking-tight">
             DigitalGeeks
           </span>

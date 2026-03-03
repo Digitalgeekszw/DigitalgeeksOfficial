@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import styles from "../style";
 import { arrowUp } from "../assets";
 
+import Image from "next/image";
+
 const GetStarted = () => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -33,9 +35,11 @@ const GetStarted = () => {
           <p className="font-poppins font-medium text-[18px] leading-[23.4px]">
             <span className="text-gradient">Let's</span>
           </p>
-          <img
+          <Image
             src={arrowUp}
             alt="arrow-up"
+            width={23}
+            height={23}
             className="w-[23px] h-[23px] object-contain"
           />
         </div>
