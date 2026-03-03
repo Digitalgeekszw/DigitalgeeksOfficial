@@ -80,7 +80,7 @@ export const feedback = [
       "Every moment holds the potential to be a pivotal dot in your life's journey. Embrace each experience, connect the dots fearlessly, and marvel at the beautiful tapestry that emerges.",
     name: "Tinotenda Nyashanu",
     title: "Founder & Leader",
-    img: people01,
+    img: "/team/Tinotenda.png",
   },
   {
     id: "feedback-2",
@@ -96,7 +96,7 @@ export const feedback = [
       "Quality is not an expense; it is an investment that pays dividends in customer satisfaction, loyalty, and long-term success.",
     name: "Patryk Trazaska",
     title: "PL Manager ",
-    img: people03,
+    img: "/team/patrik.png",
   },
 ];
 
