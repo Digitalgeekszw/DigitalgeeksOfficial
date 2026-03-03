@@ -1,70 +1,52 @@
-import React from "react";
-import styles from "../style";
-import { logo2 } from "../assets";
+"use client";
 
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Image,
-  Button,
-} from "@nextui-org/react";
-import { Mako } from "../assets";
+import React from "react";
+import NextLink from "next/link";
+import { motion } from "framer-motion";
 
 const CTA = () => {
-  const handleButtonClicked = () => {
-    window.open("https://www.linkedin.com/company/92799402/", "_blank");
-  };
-
   return (
-    // <section
-    //   className={`${styles.flexCenter}  ${styles.padding} sm:flex-col flex-row bg-black-gradient-2 rounded-[20px] box-shadow items-center justify-center`}
-    // >
-    <div id="#Tech-talk">
-      <Card isFooterBlurred className=" sm:h-[700px] col-span-12 sm:col-span-7">
-        <CardHeader className="absolute z-10 top-1 flex-col items-end">
-          <p className="text-tiny text-white uppercase font-bold">Online</p>
-          <h4 className="text-white font-medium text-xl">Tech Talk Fridays</h4>
-        </CardHeader>
-        <Image
-          removeWrapper
-          alt="Relaxing app background"
-          className="z-0 w-full h-full object-cover"
-          src={Mako}
-        />
-        <CardFooter className="absolute bg-black/40 bottom-0 z-10 border-t-1 border-default-600 dark:border-default-100">
-          <div className="flex flex-grow gap-2 items-center">
-            <Image
-              alt="Breathing app icon"
-              className="rounded-full w-10 h-11 bg-black"
-              src={logo2}
-            />
-            <div className="flex flex-col">
-              <p className="text-tiny text-white/60">DIGITALGEEKS</p>
-              <p className="text-tiny text-white/60">
-                Online Webinars and Workshops
-              </p>
-            </div>
+    <section className="sm:py-24 py-12 px-6 flex justify-center bg-white">
+      <motion.div 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-[1280px] bg-blue-50/80 rounded-[40px] px-6 py-16 sm:py-24 flex flex-col items-center text-center relative overflow-hidden"
+      >
+        {/* Subtle background decoration */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-40">
+           <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-200 rounded-full blur-[80px]"></div>
+           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-300 rounded-full blur-[80px]"></div>
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center max-w-2xl mx-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-blue-100 mb-8 shadow-sm">
+            <span className="font-poppins font-semibold text-xs text-secondary uppercase tracking-widest px-2">
+              Get Started
+            </span>
           </div>
-          <Button
-            color="primary"
-            variant="solid"
-            size="lg"
-            onClick={() => {
-              window.open(
-                "https://www.linkedin.com/posts/digitalgeeksz_join-us-as-we-unveil-the-future-of-human-computer-activity-7122973315329081344-ONAn?utm_source=share&utm_medium=member_ios",
-                "_blank"
-              );
-            }}
-          >
-            {" "}
-            Register
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
-    // </section>
+          
+          <h2 className="font-poppins font-bold text-[40px] sm:text-[56px] text-slate-900 leading-[1.1] tracking-tight mb-6">
+            Ready to build <br className="hidden sm:block"/>
+            <span className="text-secondary bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">the future?</span>
+          </h2>
+          
+          <p className="font-poppins text-slate-600 text-[18px] sm:text-[20px] leading-relaxed mb-10 max-w-lg">
+            Discuss your next big software project with our expert engineering team. We're ready to bring your vision to life.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <NextLink 
+              href="/contact" 
+              className="bg-secondary hover:bg-blue-700 text-white font-poppins font-medium px-10 py-4 text-[18px] rounded-full transition-shadow hover:shadow-xl hover:shadow-blue-500/20 w-full sm:w-auto text-center"
+            >
+              Book a Free Consultation
+            </NextLink>
+          </div>
+        </div>
+      </motion.div>
+    </section>
   );
 };
 

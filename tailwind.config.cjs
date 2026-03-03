@@ -6,6 +6,7 @@ module.exports = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/Contact.jsx",
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   mode: "jit",
@@ -33,6 +34,16 @@ module.exports = {
       fontFamily: {
         poppins: ["Inter", "sans-serif"], // Reusing the poppins class but mapping to Inter for less refactoring
         sans: ["Inter", "sans-serif"],
+      },
+      animation: {
+        shimmer: "shimmer 1.5s infinite linear",
+      },
+      keyframes: {
+        shimmer: {
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
       },
     },
     screens: {

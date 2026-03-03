@@ -1,80 +1,96 @@
+"use client";
+
 import React from "react";
 import styles from "../style";
-import GetStarted from "./GetStarted";
-// Replace robot with a cleaner block or an existing asset styled properly.
-// For now we'll use a clean placeholder layout structure in place of the neon robot.
-import { robot } from "../assets"; 
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 const Hero = () => {
   return (
     <section
       id="home"
-      className={`flex md:flex-row flex-col ${styles.paddingY} pt-[120px] bg-white min-h-[90vh]`}
+      className="relative flex flex-col items-center justify-center min-h-[90vh] bg-white overflow-hidden text-center px-6"
     >
-      <div className={`flex-1 ${styles.flexStart} flex-col xl:px-0 sm:px-16 px-6 relative z-10`}>
+      {/* Decorative ultra-subtle background gradients (Google style abstract washes) */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-50/50 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-50/50 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+      <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center mt-20">
         
-        {/* Subtle top badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full border border-slate-200 mb-6 w-fit">
-          <span className="w-2 h-2 rounded-full bg-secondary block"></span>
-          <p className="font-poppins font-medium text-sm text-slate-700">
-            Join the new standard for developers
+        {/* Google style pill badge */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-full mb-8 hover:bg-slate-100 transition-colors cursor-pointer"
+        >
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+          </span>
+          <p className="font-poppins font-medium text-sm text-slate-700 tracking-wide">
+            Introducing the new standard for developers
           </p>
-        </div>
+          <span className="text-slate-400">→</span>
+        </motion.div>
 
-        <div className="flex flex-row justify-between items-center w-full">
-          <h1 className="flex-1 font-poppins font-extrabold ss:text-[72px] text-[52px] text-slate-900 ss:leading-[1.1] leading-[1.2] tracking-tight">
-            The Next <br className="sm:block hidden" />
-            <span className="text-secondary">Generation</span>
-          </h1>
-        </div>
-
-        <h1 className="font-poppins font-extrabold ss:text-[68px] text-[52px] text-slate-900 ss:leading-[1.1] leading-[1.2] w-full mt-2 tracking-tight">
-          Digital World
-        </h1>
+        {/* Massive pristine typography */}
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="font-poppins font-semibold text-[50px] sm:text-[70px] md:text-[85px] text-slate-900 leading-[1.05] tracking-tight max-w-4xl"
+        >
+          The next generation <br className="hidden md:block"/>
+          <span className="text-secondary bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">digital workspace.</span>
+        </motion.h1>
         
-        <p className={`${styles.paragraph} max-w-[500px] mt-6 text-slate-600 text-[18px]`}>
-          At Digital Geeks, we unite a passionate community of developers to
-          create innovative solutions. With collaboration and support at our
-          core, we deliver high-quality work that exceeds client expectations.
-        </p>
+        <motion.p 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="font-poppins mt-8 text-slate-500 text-[18px] sm:text-[22px] leading-relaxed max-w-2xl font-normal tracking-wide"
+        >
+          Unite your team, collaborate seamlessly, and build the future of technology together. We empower businesses through world-class engineering.
+        </motion.p>
 
-        <div className="flex sm:flex-row flex-col gap-4 mt-10">
-          <GetStarted />
-          <a href="#Services" className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-poppins font-medium px-8 py-3.5 rounded-lg transition-colors border border-slate-200 shadow-sm flex items-center justify-center">
-            Explore Services
-          </a>
-        </div>
+        {/* Pill shaped actions */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="flex sm:flex-row flex-col gap-4 mt-12 w-full sm:w-auto"
+        >
+          <Link href="/contact" className="bg-secondary hover:bg-blue-700 text-white font-poppins font-medium px-8 py-4 rounded-full transition-shadow hover:shadow-lg hover:shadow-blue-500/20 flex items-center justify-center text-[17px] w-full sm:w-auto">
+            Get started
+          </Link>
+          <Link href="/services" className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-poppins font-medium px-8 py-4 rounded-full transition-colors flex items-center justify-center text-[17px] w-full sm:w-auto">
+            Explore services
+          </Link>
+        </motion.div>
       </div>
 
-      <div className={`flex-1 flex ${styles.flexCenter} md:my-0 my-16 relative`}>
-        {/* Clean Hero Visual Container - replaces dark neon robot */}
-        <div className="relative w-full h-[500px] max-w-lg mx-auto flex items-center justify-center">
-            {/* Subtle background abstract shapes instead of neon gradients */}
-            <div className="absolute top-10 right-10 w-72 h-72 bg-blue-50 rounded-full blur-3xl opacity-60"></div>
-            <div className="absolute bottom-10 left-10 w-64 h-64 bg-slate-100 rounded-full blur-2xl opacity-80"></div>
-            
-            <div className="relative z-10 bg-white shadow-xl shadow-slate-200/50 rounded-2xl border border-slate-100 p-8 w-[90%] backdrop-blur-sm overflow-hidden">
-                <div className="w-full h-8 flex gap-2 items-center border-b border-slate-100 mb-6 pb-4">
-                  <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                  <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                  <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                </div>
-                {/* Code/Tech Illustration mockup */}
-                <div className="space-y-4">
-                  <div className="h-4 w-3/4 bg-slate-100 rounded"></div>
-                  <div className="h-4 w-1/2 bg-blue-50 rounded"></div>
-                  <div className="h-4 w-5/6 bg-slate-50 rounded"></div>
-                  <div className="h-4 w-2/3 bg-slate-100 rounded"></div>
-                  <div className="h-4 w-full bg-slate-50 rounded mt-8"></div>
-                  <div className="h-4 w-4/5 bg-slate-100 rounded"></div>
-                  <div className="flex gap-4 mt-6">
-                    <div className="h-10 w-24 bg-secondary rounded-lg opacity-90"></div>
-                    <div className="h-10 w-24 bg-slate-100 rounded-lg"></div>
-                  </div>
-                </div>
-            </div>
+      {/* Video product representation */}
+      <motion.div 
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.5 }}
+        className="relative z-10 w-full max-w-[1200px] mx-auto mt-20 sm:mt-24 px-6 sm:px-0 mb-12"
+      >
+        <div className="w-full flex justify-center">
+          <video 
+            className="w-full rounded-[24px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] object-cover aspect-video border border-slate-200/60"
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            controls
+          >
+            <source src="https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev/videos/output1.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };

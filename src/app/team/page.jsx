@@ -1,16 +1,10 @@
-import styles from "../style";
-import {
-  Services,
-  About,
-  CTA,
-  Footer,
-  Navbar,
-  Stats,
-  Testimonials,
-  Hero,
-} from "../components";
+import React from "react";
+import PageHero from "../../components/PageHero";
+import Testimonials from "../../components/Testimonials";
+import { Navbar, Footer, CTA } from "../../components";
+import styles from "../../style";
 
-export default function Home() {
+export default function TeamPage() {
   return (
     <div className="bg-primary w-full overflow-hidden">
       <div className={`${styles.paddingX} ${styles.flexCenter}`}>
@@ -19,18 +13,13 @@ export default function Home() {
         </div>
       </div>
 
-      <div className={`bg-primary ${styles.flexStart}`}>
-        <div className={`${styles.boxWidth}`}>
-          <Hero />
-        </div>
-      </div>
+      <PageHero 
+        title="Our Leadership Team" 
+        subtitle="Meet the passionate minds leading DigitalGeeks towards continuous innovation and success." 
+      />
 
       <div className={`bg-primary ${styles.paddingX} ${styles.flexCenter}`}>
         <div className={`${styles.boxWidth}`}>
-          <Stats />
-          {/* Include teasers/sections linking to new pages */}
-          <About />
-          <Services />
           <Testimonials />
           <CTA />
           <Footer />

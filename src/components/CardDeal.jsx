@@ -1,26 +1,9 @@
-import React, { useRef } from "react";
-import { card } from "../assets";
+"use client";
+
+import React from "react";
 import styles, { layout } from "../style";
-import Button from "./Button";
-import YouTube from "react-youtube";
-import { useInView } from "react-intersection-observer";
 
 const CardDeal = () => {
-  const videoId = "svtDMM82PZY";
-  const videoRef = useRef(null);
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.5, // Adjust this threshold as needed
-  });
-
-  // Autoplay the video when the section is in view
-  if (inView) {
-    const player = videoRef.current.internalPlayer;
-    if (player) {
-      player.playVideo();
-    }
-  }
-
   return (
     <section id="Community" className={layout.section}>
       <div className={layout.sectionInfo}>
@@ -40,17 +23,18 @@ const CardDeal = () => {
         {/* <Button styles={`mt-10`}>About</Button> */}
       </div>
 
-      <div className={layout.sectionImg} ref={ref}>
-        <YouTube
-          videoId={videoId}
-          className="w-[100%] h-[100%]"
-          opts={{
-            playerVars: {
-              autoplay: 0, // Set autoplay to 0 to prevent initial autoplay
-            },
-          }}
-          ref={videoRef}
-        />
+      <div className={layout.sectionImg}>
+        <div className="w-full h-full rounded-[20px] overflow-hidden shadow-2xl border border-[#dadce0]">
+           <video 
+              src="https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev/videos/output2.mp4"
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
+           />
+        </div>
       </div>
     </section>
   );

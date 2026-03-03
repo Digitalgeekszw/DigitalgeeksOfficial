@@ -2,18 +2,14 @@ import {
   people01,
   people02,
   people03,
-  facebook,
-  instagram,
-  linkedin,
-  twitter,
   airbnb,
   binance,
   coinbase,
   dropbox,
-  send,
-  shield,
-  star,
 } from "../assets";
+
+import { MdOutlineTipsAndUpdates, MdOutlinePeople, MdOutlineWorkspacePremium } from "react-icons/md";
+import { FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa";
 
 export const navLinks = [
   {
@@ -48,29 +44,29 @@ export const navLinks = [
   },
   {
     id: "join",
-    title: "Join Us",
-    link: "https://job-portal-ten-ashy.vercel.app/",
+    title: "Careers",
+    link: "/careers",
   },
 ];
 
 export const features = [
   {
     id: "feature-1",
-    icon: star,
+    icon: MdOutlineTipsAndUpdates,
     title: "Innovation:",
     content:
       "At Digital Geeks, we prioritize innovation in our work, always striving to bring fresh and creative ideas to the table. We encourage our developers to think outside the box, experiment with new technologies, and challenge the status quo to find better solutions for our clients.",
   },
   {
     id: "feature-2",
-    icon: shield,
+    icon: MdOutlinePeople,
     title: "Collaboration:",
     content:
       "Collaboration is a crucial part of our company's DNA, and we believe that working together leads to better outcomes. We encourage open communication and active participation from our team members, valuing every voice and perspective in our community.",
   },
   {
     id: "feature-3",
-    icon: send,
+    icon: MdOutlineWorkspacePremium,
     title: "Excellence:",
     content:
       "Excellence is a core value at Digital Geeks, and we are committed to delivering the highest quality work on every project we undertake. We hold ourselves to the highest standards of professionalism, attention to detail, and customer service.",
@@ -153,11 +149,11 @@ export const footerLinks = [
     links: [
       {
         name: "Join Community ",
-        link: "https://job-portal-ten-ashy.vercel.app/",
+        link: "/careers",
       },
       {
         name: "Careers",
-        link: "https://job-portal-ten-ashy.vercel.app/",
+        link: "/careers",
       },
       // {
       //   name: "Suggestions",
@@ -191,22 +187,22 @@ export const footerLinks = [
 export const socialMedia = [
   {
     id: "social-media-1",
-    icon: instagram,
+    icon: FaInstagram,
     link: "https://www.instagram.com/digitalgeeksz",
   },
   {
     id: "social-media-2",
-    icon: facebook,
+    icon: FaFacebook,
     link: "https://www.facebook.com/digitalgeeksz",
   },
   {
     id: "social-media-3",
-    icon: twitter,
+    icon: FaTwitter,
     link: "https://x.com/digitalgeeksz?s=21&t=ifzqj6IyGCX-PgD6NPgBKQ",
   },
   {
     id: "social-media-4",
-    icon: linkedin,
+    icon: FaLinkedin,
     link: "https://www.linkedin.com/company/92799402",
   },
 ];

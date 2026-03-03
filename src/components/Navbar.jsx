@@ -1,9 +1,13 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { close, logo, menu, logo2 } from "../assets";
+import { close, menu } from "../assets";
 import { navLinks } from "../constants";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
-  const [active, setActive] = useState("Home");
+  const pathname = usePathname();
   const [toggle, setToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -34,10 +38,12 @@ const Navbar = () => {
       }`}
     >
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-        <img src={logo2} alt="DigitalGeeks Logo" className="w-[40px] h-[40px] opacity-90 rounded-md" />
-        <span className="font-poppins font-bold text-xl text-slate-800 hidden sm:block tracking-tight">
-          DigitalGeeks
-        </span>
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/logo.png" alt="DigitalGeeks Logo" className="w-[40px] h-auto object-contain opacity-90 rounded-md" />
+          <span className="font-poppins font-bold text-xl text-slate-800 hidden sm:block tracking-tight">
+            DigitalGeeks
+          </span>
+        </Link>
       </div>
 
       <ul className="list-none sm:flex hidden justify-center items-center flex-1">
@@ -46,16 +52,10 @@ const Navbar = () => {
             <li
               key={nav.id}
               className={`font-poppins font-medium cursor-pointer text-[15px] transition-colors duration-200 ${
-                active === nav.title ? "text-secondary" : "text-slate-600 hover:text-secondary"
+                pathname === nav.link ? "text-secondary" : "text-slate-600 hover:text-secondary"
               } mr-10`}
-              onClick={() => {
-                if (nav.id === "Contact") {
-                  handleContactClick();
-                } else {
-                  setActive(nav.title);
-                }
-              }}>
-              <a href={`#${nav.id}`}>{nav.title}</a>
+            >
+              <Link href={nav.link}>{nav.title}</Link>
             </li>
           )
         ))}
@@ -65,14 +65,12 @@ const Navbar = () => {
       <div className="hidden sm:flex items-center">
          {navLinks.map((nav) => (
            nav.id === "join" && (
-             <a
+             <Link
                 key={nav.id}
                 href={nav.link}
-                target="_blank"
-                rel="noreferrer"
                 className="bg-secondary px-6 py-2.5 rounded-md font-poppins font-medium text-[15px] text-white hover:bg-blue-700 transition-colors shadow-sm">
                 {nav.title}
-             </a>
+             </Link>
            )
          ))}
       </div>
@@ -97,26 +95,18 @@ const Navbar = () => {
               <li
                 key={nav.id}
                 className={`font-poppins font-medium cursor-pointer text-[16px] w-full ${
-                  active === nav.title ? "text-secondary" : "text-slate-700"
+                  pathname === nav.link ? "text-secondary" : "text-slate-700"
                 } ${index === navLinks.length - 1 ? "mb-0 mt-4" : "mb-4"}`}
-                onClick={() => {
-                  setToggle(false);
-                  if (nav.id === "Contact") {
-                    handleContactClick();
-                  } else {
-                    setActive(nav.title);
-                  }
-                }}>
+                onClick={() => setToggle(false)}
+              >
                 {nav.id === "join" ? (
-                  <a
+                  <Link
                     href={nav.link}
-                    target="_blank"
-                    rel="noreferrer"
                     className="bg-secondary px-6 py-3 rounded-md text-center block w-full text-white">
                     {nav.title}
-                  </a>
+                  </Link>
                 ) : (
-                  <a href={`#${nav.id}`} className="block w-full">{nav.title}</a>
+                  <Link href={nav.link} className="block w-full">{nav.title}</Link>
                 )}
               </li>
             ))}
