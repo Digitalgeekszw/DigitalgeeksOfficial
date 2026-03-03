@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-const PageHero = ({ title, subtitle, badge = "DigitalGeeks" }) => {
+const PageHero = ({ title, subtitle, badge = "DigitalGeeks", imageSrc = "/images/about-hero-visual.png" }) => {
   return (
     <section className="relative w-full overflow-hidden bg-white pt-[120px] pb-[80px] sm:pt-[160px] sm:pb-[100px]">
 
@@ -83,12 +83,13 @@ const PageHero = ({ title, subtitle, badge = "DigitalGeeks" }) => {
         >
           <div className="relative w-full aspect-square max-w-[480px] rounded-[2.5rem] overflow-hidden shadow-[0_32px_80px_-12px_rgba(37,99,235,0.2)] border border-slate-100">
             <Image
-              src="/images/about-hero-visual.png"
-              alt="Digital Innovation Network"
+              src={imageSrc}
+              alt={title || "Digital Innovation Network"}
               fill
               className="object-cover"
               sizes="(max-width: 1060px) 100vw, 480px"
               priority
+              quality={100}
             />
             {/* Overlay shimmer */}
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/5 to-indigo-500/5 pointer-events-none" />
