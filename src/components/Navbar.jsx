@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { close, menu } from "../assets";
 import { navLinks } from "../constants";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FiMenu, FiX } from "react-icons/fi";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -77,14 +77,17 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div className="sm:hidden flex flex-1 justify-end items-center">
-        {/* We use standard menu icon, but tint it dark since background is likely light */}
-        <img
-          src={toggle ? close : menu}
-          alt="menu"
-          className="w-[28px] h-[28px] object-contain cursor-pointer"
-          style={{ filter: "invert(1)" }} // invert because original might be white
+        {/* We use FiMenu/FiX icons for a cleaner look */}
+        <div 
+          className="cursor-pointer text-slate-800"
           onClick={() => setToggle(!toggle)}
-        />
+        >
+          {toggle ? (
+            <FiX size={28} />
+          ) : (
+            <FiMenu size={28} />
+          )}
+        </div>
 
         <div
           className={`${
