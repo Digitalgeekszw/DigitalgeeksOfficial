@@ -7,6 +7,7 @@ import { FiMapPin, FiBriefcase, FiArrowLeft, FiUpload, FiCheckCircle } from "rea
 import styles from "../../../style";
 import { JOB_LISTINGS } from "../../../data/jobs";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 
 export default function JobDetailsPage() {
   const { id } = useParams();
@@ -137,8 +138,8 @@ export default function JobDetailsPage() {
           </div>
 
           <div className="prose prose-blue max-w-none">
-            <div className="whitespace-pre-line font-roboto text-[18px] leading-relaxed text-[#3c4043]">
-              {job.details}
+            <div className="font-roboto text-[18px] leading-relaxed text-[#3c4043]">
+              <ReactMarkdown>{job.details}</ReactMarkdown>
             </div>
           </div>
         </div>

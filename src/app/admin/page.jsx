@@ -77,7 +77,7 @@ function Modal({ isOpen, onClose, title, children, footer }) {
 }
 
 // ─── Dashboard Overview ─────────────────────────────────────────────────────
-function DashboardOverview({ stats }) {
+function DashboardOverview({ stats, setActiveTab }) {
   const cards = [
     { label: "Active Job Openings", value: stats.jobs, icon: FiBriefcase, color: "text-indigo-600", bg: "bg-indigo-50" },
     { label: "Total Applications", value: stats.applicants, icon: FiUsers, color: "text-blue-600", bg: "bg-blue-50" },
@@ -113,13 +113,19 @@ function DashboardOverview({ stats }) {
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <h3 className="font-bold text-slate-900 mb-4">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-4">
-            <button className="flex flex-col items-center justify-center p-4 border border-slate-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-100 transition-colors group">
+            <button 
+              onClick={() => setActiveTab("jobs")}
+              className="flex flex-col items-center justify-center p-4 border border-slate-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-100 transition-colors group"
+            >
               <div className="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center mb-2 group-hover:bg-white">
                 <FiPlus className="text-indigo-600" />
               </div>
               <span className="text-xs font-semibold text-slate-700">Add New Job</span>
             </button>
-            <button className="flex flex-col items-center justify-center p-4 border border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-100 transition-colors group">
+            <button 
+              onClick={() => setActiveTab("applicants")}
+              className="flex flex-col items-center justify-center p-4 border border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-100 transition-colors group"
+            >
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mb-2 group-hover:bg-white">
                 <FiUsers className="text-blue-600" />
               </div>
@@ -764,7 +770,7 @@ export default function RevolutAdminPanel() {
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
             >
-              {activeTab === "dashboard" && <DashboardOverview stats={stats} />}
+              {activeTab === "dashboard" && <DashboardOverview stats={stats} setActiveTab={setActiveTab} />}
               {activeTab === "applicants" && <ApplicantsSection />}
               {activeTab === "contacts" && <ContactsSection />}
               {activeTab === "jobs" && <JobsSection />}
