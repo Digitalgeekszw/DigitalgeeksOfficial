@@ -72,6 +72,44 @@ export const features = [
   },
 ];
 
+export const valuePropositions = [
+  {
+    id: "vp-1",
+    title: "Engineering Excellence",
+    description: "We build robust, scalable architectures leveraging the latest technologies to ensure your platform performs flawlessly under pressure.",
+    icon: MdOutlineWorkspacePremium, // You can change icons later
+  },
+  {
+    id: "vp-2",
+    title: "Scalable Solutions",
+    description: "Our solutions are designed to grow with your business, anticipating future needs and seamlessly accommodating increased demand.",
+    icon: MdOutlineTipsAndUpdates,
+  },
+  {
+    id: "vp-3",
+    title: "Strategic Partnerships",
+    description: "We don't just write code; we partner with you to understand your core business objectives and deliver technology that drives real value.",
+    icon: MdOutlinePeople,
+  },
+];
+
+export const innovationShowcase = [
+  {
+    id: "showcase-1",
+    title: "Preciagro",
+    category: "Agritech System",
+    image: "/preciagro.png", 
+    link: "#",
+  },
+  {
+    id: "showcase-2",
+    title: "Sanaganai",
+    category: "Event Management System",
+    image: "/sanaganai.png",
+    link: "#",
+  },
+];
+
 export const feedback = [
   {
     id: "feedback-1",

@@ -7,6 +7,8 @@ import {
   Navbar,
   Stats,
   Hero,
+  ValueProposition,
+  InnovationShowcase,
 } from "../components";
 
 export default function Home() {
@@ -27,7 +29,15 @@ export default function Home() {
       <div className={`bg-primary ${styles.paddingX} ${styles.flexCenter}`}>
         <div className={`${styles.boxWidth}`}>
           <Stats />
-          {/* Include teasers/sections linking to new pages */}
+        </div>
+      </div>
+      
+      {/* Professional Value Sections */}
+      <ValueProposition />
+      <InnovationShowcase />
+
+      <div className={`bg-primary ${styles.paddingX} ${styles.flexCenter}`}>
+        <div className={`${styles.boxWidth}`}>
           <About />
           <Services />
           <CTA />

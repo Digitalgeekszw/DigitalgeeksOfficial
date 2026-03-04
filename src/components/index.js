@@ -10,6 +10,8 @@ import Testimonials from "./Testimonials";
 import Hero from "./Hero";
 import CommunityHighlights from "./CommunityHighlights";
 import JoinCommunity from "./JoinCommunity";
+import ValueProposition from "./ValueProposition";
+import InnovationShowcase from "./InnovationShowcase";
 // import VideoPlayer from "./video";
 
 export {
@@ -25,5 +27,7 @@ export {
   Hero,
   CommunityHighlights,
   JoinCommunity,
+  ValueProposition,
+  InnovationShowcase,
   // VideoPlayer,
 };
