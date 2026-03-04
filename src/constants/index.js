@@ -99,7 +99,7 @@ export const innovationShowcase = [
     title: "Preciagro",
     category: "Agritech System",
     image: "/preciagro.png", 
-    link: "#",
+    link: "https://www.preciagro.com/",
   },
   {
     id: "showcase-2",

@@ -1,45 +1,48 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import Image from "next/image";
 import { innovationShowcase } from "../constants";
 
 const ShowcaseCard = ({ title, category, image, link, index }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.6, delay: index * 0.15 }}
-    className="group relative overflow-hidden rounded-2xl cursor-pointer"
-  >
-    <div className="relative w-full h-[300px] sm:h-[400px]">
-      <Image
-        src={image}
-        alt={title}
-        fill
-        className="object-cover transition-transform duration-700 group-hover:scale-110"
-      />
-      {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
-    </div>
+  <Link href={link} target="_blank" rel="noopener noreferrer">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.15 }}
+      className="group relative overflow-hidden rounded-2xl cursor-pointer"
+    >
+      <div className="relative w-full h-[300px] sm:h-[400px]">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+      </div>
 
-    <div className="absolute inset-0 p-8 flex flex-col justify-end">
-      <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-        <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-400 uppercase bg-blue-900/50 backdrop-blur-sm rounded-full border border-blue-400/20">
-          {category}
-        </span>
-        <h3 className="text-2xl sm:text-3xl font-bold font-poppins text-white mb-2 tracking-tight">
-          {title}
-        </h3>
-        <div className="flex items-center text-blue-300 font-medium text-sm mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-          Explore Project
-          <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
+      <div className="absolute inset-0 p-8 flex flex-col justify-end">
+        <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+          <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-blue-400 uppercase bg-blue-900/50 backdrop-blur-sm rounded-full border border-blue-400/20">
+            {category}
+          </span>
+          <h3 className="text-2xl sm:text-3xl font-bold font-poppins text-white mb-2 tracking-tight">
+            {title}
+          </h3>
+          <div className="flex items-center text-blue-300 font-medium text-sm mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+            Explore Project
+            <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
         </div>
       </div>
-    </div>
-  </motion.div>
+    </motion.div>
+  </Link>
 );
 
 const InnovationShowcase = () => {
