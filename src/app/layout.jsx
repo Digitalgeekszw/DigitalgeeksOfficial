@@ -17,13 +17,34 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: "DigitalGeeksz",
-  description: "DigitalGeeks is a leading technology company of developers, designers, and insights on various digital topics.",
-  keywords: "technology blog, digital topics, articles, tutorials, insights, software development, web development, artificial intelligence, machine learning, cybersecurity, DigitalGeeks, community",
-  authors: [{ name: "DigitalGeeks" }],
+  title: "Digital Geeks | Leading Tech Innovations & Digital Solutions",
+  description: "Digital Geeks is a premier technology partner specializing in software development, AI, and digital transformation. Discover insights, tutorials, and cutting-edge solutions.",
+  keywords: "technology company, software development, digital transformation, AI, machine learning, cybersecurity, web development, Digital Geeks, tech solutions, digitalgeeks.tech",
+  authors: [{ name: "Digital Geeks" }],
+  metadataBase: new URL("https://www.digitalgeeks.tech"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    siteName: "DigitalGeeks",
-    url: "https://www.digitalgeeks.pl",
+    title: "Digital Geeks | Leading Tech Innovations",
+    description: "Empowering businesses through cutting-edge technology and digital excellence.",
+    url: "https://www.digitalgeeks.tech",
+    siteName: "Digital Geeks",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Digital Geeks | Leading Tech Innovations",
+    description: "Empowering businesses through cutting-edge technology and digital excellence.",
+    images: ["/logo.png"],
   },
 };
 
@@ -33,9 +54,6 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" type="image/ico" href="/Icon.ico" />
         <meta name="theme-color" content="#000000" />
-        <link rel="canonical" href="https://www.digitalgeeks.pl" />
-        <meta property="article:publisher" content="https://www.facebook.com/digitalgeeksz" />
-        <meta property="article:author" content="https://www.facebook.com/digitalgeeksz" />
         {/* Google Tag Manager */}
         <Script
           strategy="afterInteractive"
@@ -59,10 +77,21 @@ export default function RootLayout({ children }) {
              __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "DigitalGeeks",
-              "url": "https://www.digitalgeeks.pl",
-              "logo": "https://www.digitalgeeks.pl/Icon.ico",
-              "description": "DigitalGeeks is a leading technology company providing insights on digital topics."
+              "name": "Digital Geeks",
+              "url": "https://www.digitalgeeks.tech",
+              "logo": "https://www.digitalgeeks.tech/Icon.ico",
+              "description": "Digital Geeks is a leading technology company providing insights on digital topics and building world-class software.",
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "",
+                "contactType": "customer service"
+              },
+              "sameAs": [
+                "https://www.facebook.com/digitalgeeksz",
+                "https://www.instagram.com/digitalgeeksz",
+                "https://www.linkedin.com/company/92799402",
+                "https://x.com/digitalgeeksz"
+              ]
             })
           }}
         />
