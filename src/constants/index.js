@@ -6,6 +6,10 @@ import {
   binance,
   coinbase,
   dropbox,
+  google,
+  meta,
+  pwc,
+  apple,
 } from "../assets";
 
 import { MdOutlineTipsAndUpdates, MdOutlinePeople, MdOutlineWorkspacePremium } from "react-icons/md";
@@ -31,11 +35,6 @@ export const navLinks = [
     id: "community",
     title: "Community and Culture",
     link: "/community",
-  },
-  {
-    id: "team",
-    title: "Our Team",
-    link: "/team",
   },
   {
     id: "contact",
@@ -119,6 +118,15 @@ export const stats = [
 ];
 
 export const footerLinks = [
+  {
+    title: "Pages",
+    links: [
+      {
+        name: "Our Team",
+        link: "/team",
+      },
+    ],
+  },
   {
     title: "Useful Links",
     links: [
@@ -210,18 +218,18 @@ export const socialMedia = [
 export const clients = [
   {
     id: "client-1",
-    logo: airbnb,
+    logo: google,
   },
   {
     id: "client-2",
-    logo: binance,
+    logo: meta,
   },
   {
     id: "client-3",
-    logo: coinbase,
+    logo: pwc,
   },
   {
     id: "client-4",
-    logo: dropbox,
+    logo: apple,
   },
 ];

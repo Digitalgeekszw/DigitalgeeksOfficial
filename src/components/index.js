@@ -8,7 +8,10 @@ import Stats from "./Stats";
 import Footer from "./Footer";
 import Testimonials from "./Testimonials";
 import Hero from "./Hero";
+import CommunityHighlights from "./CommunityHighlights";
+import JoinCommunity from "./JoinCommunity";
 // import VideoPlayer from "./video";
+
 export {
   Navbar,
   Services,
@@ -20,5 +23,7 @@ export {
   Footer,
   Testimonials,
   Hero,
+  CommunityHighlights,
+  JoinCommunity,
   // VideoPlayer,
 };

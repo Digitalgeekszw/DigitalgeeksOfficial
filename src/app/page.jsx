@@ -6,7 +6,6 @@ import {
   Footer,
   Navbar,
   Stats,
-  Testimonials,
   Hero,
 } from "../components";
 
@@ -31,7 +30,6 @@ export default function Home() {
           {/* Include teasers/sections linking to new pages */}
           <About />
           <Services />
-          <Testimonials />
           <CTA />
           <Footer />
         </div>

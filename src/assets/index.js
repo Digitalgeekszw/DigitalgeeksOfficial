@@ -25,6 +25,9 @@ import people02 from "./people02.png";
 import people03 from "./people03.png";
 import Mako from "./Mako.jpg";
 import logo2 from "./logo2.png";
+import meta from "./meta.svg";
+import pwc from "./pwc.svg";
+
 
 export {
   airbnb,
@@ -54,4 +57,6 @@ export {
   people02,
   people03,
   Mako,
+  meta,
+  pwc,
 };
