@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdOutlineEmail, MdOutlinePhone, MdOutlineLocationOn, MdCheckCircle, MdError, MdArrowForward } from "react-icons/md";
+import { MdOutlineLocationOn, MdCheckCircle, MdError, MdArrowForward } from "react-icons/md";
+import { socialMedia } from "./constants";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -105,31 +106,31 @@ export default function ContactForm() {
           <div className="flex flex-col gap-8">
             <div className="flex items-center gap-6 group">
               <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 flex-shrink-0 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-300">
-                <MdOutlineEmail className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-poppins font-medium text-white text-lg">hello@digitalgeeks.com</h4>
-                <p className="font-poppins text-slate-500 text-sm mt-0.5">Typical response: 24 hours</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6 group">
-              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 flex-shrink-0 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-300">
-                <MdOutlinePhone className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-poppins font-medium text-white text-lg">+263 123 456 789</h4>
-                <p className="font-poppins text-slate-500 text-sm mt-0.5">Mon-Fri, 8am - 5pm</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-6 group">
-              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 flex-shrink-0 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-300">
                 <MdOutlineLocationOn className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-poppins font-medium text-white text-lg">Harare, Zimbabwe</h4>
-                <p className="font-poppins text-slate-500 text-sm mt-0.5">Global Engineering Hub</p>
+                <h4 className="font-poppins font-medium text-white text-lg">Poland</h4>
+                <p className="font-poppins text-slate-500 text-sm mt-0.5">Operates Globally</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 mt-4">
+              <p className="font-poppins text-slate-400 text-sm uppercase tracking-widest">Connect with us</p>
+              <div className="flex gap-4">
+                {socialMedia.map((social) => {
+                  const Icon = social.icon;
+                  return (
+                    <a 
+                      key={social.id} 
+                      href={social.link} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all duration-300"
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>

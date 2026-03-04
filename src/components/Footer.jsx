@@ -62,11 +62,8 @@ const Footer = () => (
              We craft digital experiences that transform businesses and build the future. Our commitment to excellence drives every project we undertake.
            </p>
            <div className="flex flex-col gap-3">
-             <a href="mailto:hello@digitalgeeks.com" className="text-[14px] text-slate-600 hover:text-blue-600 transition-colors flex items-center gap-2">
-               hello@digitalgeeks.com
-             </a>
              <span className="text-[14px] text-slate-600 flex items-center gap-2">
-               123 Innovation Drive, Tech District, City 10012
+               Poland (Operates Globally)
              </span>
            </div>
         </div>

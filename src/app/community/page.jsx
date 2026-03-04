@@ -16,6 +16,7 @@ export default function CommunityPage() {
       <PageHero 
         title="Community & Culture" 
         subtitle="Join our dynamic community of creators, builders, and visionaries shaping the future of technology." 
+        imageSrc="/images/post.png"
       />
 
       <div className={`bg-primary ${styles.paddingX} ${styles.flexCenter}`}>

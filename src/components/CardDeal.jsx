@@ -2,7 +2,6 @@
 
 import React from "react";
 import styles, { layout } from "../style";
-import Image from "next/image";
 
 const CardDeal = () => {
   return (
@@ -25,13 +24,15 @@ const CardDeal = () => {
       </div>
 
       <div className={layout.sectionImg}>
-        <div className="w-full h-full rounded-[24px] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] border border-slate-200/60 relative aspect-square sm:aspect-auto sm:h-[450px]">
-           <Image 
-              src="/images/post.png"
-              alt="Community and Culture"
-              fill
-              className="object-cover"
-              sizes="(max-width: 1060px) 100vw, 50vw"
+        <div className="w-full h-full rounded-[20px] overflow-hidden shadow-2xl border border-[#dadce0]">
+           <video 
+              src="https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev/videos/output2.mp4"
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
            />
         </div>
       </div>
