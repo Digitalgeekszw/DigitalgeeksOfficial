@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "../../../../lib/mongodb";
 import JobApplication from "../../../../models/JobApplication";
+import { sendApplicationStatusEmail } from "../../../../utils/email";
 
 export async function GET(req) {
   try {
@@ -55,6 +56,15 @@ export async function PATCH(req) {
     if (!updated) {
       return NextResponse.json({ message: "Application not found." }, { status: 404 });
     }
+
+    // Send email notification to applicant (non-blocking)
+    sendApplicationStatusEmail({
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      email: updated.email,
+      jobTitle: updated.jobTitle,
+      status: updated.status,
+    }).catch((err) => console.error("Failed to send status email:", err));
 
     return NextResponse.json({ message: "Status updated successfully", application: updated }, { status: 200 });
   } catch (error) {
