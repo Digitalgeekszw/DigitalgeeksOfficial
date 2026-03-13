@@ -8,6 +8,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: true,
+  },
 });
 
 const STATUS_MESSAGES = {
@@ -33,12 +36,31 @@ const STATUS_MESSAGES = {
   },
 };
 
+function buildPlainText({ fullName, jobTitle, body, fromEmail }) {
+  return [
+    `Dear ${fullName},`,
+    ``,
+    body,
+    ``,
+    `Position Applied For: ${jobTitle}`,
+    ``,
+    `If you have any questions, feel free to reply to this email or contact us at ${fromEmail}.`,
+    ``,
+    `--`,
+    `Digital Geeks — Technology & Innovation`,
+    `© ${new Date().getFullYear()} Digital Geeks. All rights reserved.`,
+    `This email was sent regarding your job application.`,
+  ].join("\n");
+}
+
 export async function sendApplicationStatusEmail({ firstName, lastName, email, jobTitle, status }) {
   const template = STATUS_MESSAGES[status];
   if (!template) return; // No email for "Pending" or unknown statuses
 
   const fullName = `${firstName} ${lastName}`;
   const fromEmail = process.env.SMTP_USER;
+
+  const text = buildPlainText({ fullName, jobTitle, body: template.body, fromEmail });
 
   const html = `
 <!DOCTYPE html>
@@ -90,8 +112,10 @@ export async function sendApplicationStatusEmail({ firstName, lastName, email, j
 
   await transporter.sendMail({
     from: `"Digital Geeks Careers" <${fromEmail}>`,
+    replyTo: fromEmail,
     to: email,
     subject: template.subject,
+    text,
     html,
   });
 }
