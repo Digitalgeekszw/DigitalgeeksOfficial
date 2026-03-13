@@ -57,14 +57,17 @@ export async function PATCH(req) {
       return NextResponse.json({ message: "Application not found." }, { status: 404 });
     }
 
-    // Send email notification to applicant (non-blocking)
-    sendApplicationStatusEmail({
-      firstName: updated.firstName,
-      lastName: updated.lastName,
-      email: updated.email,
-      jobTitle: updated.jobTitle,
-      status: updated.status,
-    }).catch((err) => console.error("Failed to send status email:", err));
+    try {
+      await sendApplicationStatusEmail({
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+        email: updated.email,
+        jobTitle: updated.jobTitle,
+        status: updated.status,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send status email:", emailErr.message);
+    }
 
     return NextResponse.json({ message: "Status updated successfully", application: updated }, { status: 200 });
   } catch (error) {
