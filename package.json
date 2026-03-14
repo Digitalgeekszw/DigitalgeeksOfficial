@@ -31,6 +31,7 @@
     "react-spring": "^10.0.3",
     "react-typewriter-effect": "^1.1.0",
     "react-youtube": "^10.1.0",
+    "resend": "^6.9.3",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

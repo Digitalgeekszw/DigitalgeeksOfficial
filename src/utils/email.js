@@ -1,42 +1,31 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  tls: {
-    rejectUnauthorized: true,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const STATUS_MESSAGES = {
   Reviewed: {
-    subject: "Your Application Has Been Reviewed – Digital Geeks",
+    subject: "Application Received: Next Steps – Digital Geeks",
     heading: "Application Under Review",
-    body: "We've completed an initial review of your application and are giving it serious consideration. Our team will be in touch with further updates as we move through our selection process.",
+    body: "We have completed an initial review of your application and are giving it serious consideration. Our team will be in touch with further updates as we move through our selection process.",
   },
   "Interview Scheduled": {
-    subject: "Interview Invitation – Digital Geeks",
-    heading: "You've Been Selected for an Interview!",
-    body: "Congratulations! We were impressed by your application and would like to invite you to an interview. A member of our team will reach out to you shortly with the interview details, including the date, time, and format.",
+    subject: "Interview Request – Digital Geeks",
+    heading: "We Would Like to Interview You",
+    body: "We were impressed by your application and would like to invite you to an interview. A member of our team will reach out to you shortly with the interview details, including the date, time, and format.",
   },
   Rejected: {
-    subject: "Update on Your Application – Digital Geeks",
-    heading: "Application Status Update",
+    subject: "Your Application Status – Digital Geeks",
+    heading: "Application Decision",
     body: "Thank you for your interest in joining Digital Geeks and for the time you invested in your application. After careful consideration, we have decided not to move forward with your application at this time. We encourage you to apply for future openings that match your skills and experience.",
   },
   Hired: {
-    subject: "Congratulations! You've Been Selected – Digital Geeks",
-    heading: "Welcome to Digital Geeks!",
-    body: "We are thrilled to let you know that you have been selected for the position! Our team will be reaching out to you very shortly with all the details regarding your onboarding, start date, and next steps. Welcome aboard — we can't wait to have you on the team!",
+    subject: "Application Decision – Digital Geeks",
+    heading: "Welcome to the Digital Geeks Team",
+    body: "We are pleased to inform you that you have been selected for the position. Our team will be in touch very shortly with details regarding your onboarding, start date, and next steps. We look forward to having you on board.",
   },
 };
 
-function buildPlainText({ fullName, jobTitle, body, fromEmail }) {
+function buildPlainText({ fullName, jobTitle, body }) {
   return [
     `Dear ${fullName},`,
     ``,
@@ -44,7 +33,7 @@ function buildPlainText({ fullName, jobTitle, body, fromEmail }) {
     ``,
     `Position Applied For: ${jobTitle}`,
     ``,
-    `If you have any questions, feel free to reply to this email or contact us at ${fromEmail}.`,
+    `If you have any questions, feel free to reply to this email or contact us at careers@digitalgeeks.tech.`,
     ``,
     `--`,
     `Digital Geeks — Technology & Innovation`,
@@ -55,15 +44,12 @@ function buildPlainText({ fullName, jobTitle, body, fromEmail }) {
 
 export async function sendApplicationStatusEmail({ firstName, lastName, email, jobTitle, status }) {
   const template = STATUS_MESSAGES[status];
-  if (!template) return; // No email for "Pending" or unknown statuses
+  if (!template) return;
 
   const fullName = `${firstName} ${lastName}`;
-  const fromEmail = process.env.SMTP_USER;
+  const text = buildPlainText({ fullName, jobTitle, body: template.body });
 
-  const text = buildPlainText({ fullName, jobTitle, body: template.body, fromEmail });
-
-  const html = `
-<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -94,7 +80,7 @@ export async function sendApplicationStatusEmail({ firstName, lastName, email, j
                   </td>
                 </tr>
               </table>
-              <p style="margin:0;color:#374151;font-size:15px;line-height:1.6;">If you have any questions, feel free to reply to this email or contact us at <a href="mailto:${fromEmail}" style="color:#3b82f6;text-decoration:none;">${fromEmail}</a>.</p>
+              <p style="margin:0;color:#374151;font-size:15px;line-height:1.6;">If you have any questions, feel free to reply to this email or contact us at <a href="mailto:careers@digitalgeeks.tech" style="color:#3b82f6;text-decoration:none;">careers@digitalgeeks.tech</a>.</p>
             </td>
           </tr>
           <tr>
@@ -108,11 +94,11 @@ export async function sendApplicationStatusEmail({ firstName, lastName, email, j
     </tr>
   </table>
 </body>
-</html>`.trim();
+</html>`;
 
-  await transporter.sendMail({
-    from: `"Digital Geeks Careers" <${fromEmail}>`,
-    replyTo: fromEmail,
+  await resend.emails.send({
+    from: "Digital Geeks Careers <careers@digitalgeeks.tech>",
+    reply_to: "careers@digitalgeeks.tech",
     to: email,
     subject: template.subject,
     text,
