@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '../../../../lib/mongodb';
 import JobApplication from '../../../../models/JobApplication';
 import InterviewSlot from '../../../../models/InterviewSlot';
-import { sendInterviewConfirmationEmail } from '../../../../utils/email';
+import { createInterviewEvent } from '../../../../utils/googleCalendar';
 
 export async function POST(req) {
   try {
@@ -26,21 +26,29 @@ export async function POST(req) {
       return NextResponse.json({ message: 'No interview slot found for this applicant.' }, { status: 404 });
     }
 
-    const slot = application.interviewSlot;
-    const meetLink = slot.meetLink || process.env.GOOGLE_MEET_ROOM_URL || null;
+    const slot = await InterviewSlot.findById(application.interviewSlot._id);
+    let meetLink = slot.meetLink || process.env.GOOGLE_MEET_ROOM_URL || null;
 
-    await sendInterviewConfirmationEmail({
-      firstName: application.firstName,
-      lastName: application.lastName,
-      email: application.email,
-      jobTitle: application.jobTitle,
+    if (slot.googleEventId) {
+      return NextResponse.json({ message: 'Calendar event already exists.' }, { status: 200 });
+    }
+
+    // Create the calendar event without emailing the candidate
+    const result = await createInterviewEvent({
       startTime: slot.startTime,
-      meetLink,
+      endTime: slot.endTime,
+      applicantName: `${application.firstName} ${application.lastName}`,
+      applicantEmail: application.email,
+      jobTitle: application.jobTitle,
     });
 
-    return NextResponse.json({ message: 'Confirmation email resent successfully.' }, { status: 200 });
+    slot.googleEventId = result.googleEventId;
+    slot.meetLink = result.meetLink || meetLink;
+    await slot.save();
+
+    return NextResponse.json({ message: 'Added to your Google Calendar.' }, { status: 200 });
   } catch (error) {
     console.error('Resend Interview Email Error:', error);
-    return NextResponse.json({ message: 'Failed to resend email.', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to resend.', error: error.message }, { status: 500 });
   }
 }
