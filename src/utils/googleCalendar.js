@@ -49,15 +49,35 @@ export async function createInterviewEvent({ startTime, endTime, applicantName, 
     },
   };
 
-  const response = await calendar.events.insert({
+  const insertResponse = await calendar.events.insert({
     calendarId,
     resource: event,
     conferenceDataVersion: 1,
     sendUpdates: 'all',
   });
 
-  const createdEvent = response.data;
-  const meetLink = createdEvent.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri || null;
+  let createdEvent = insertResponse.data;
+
+  // Meet link is sometimes not in the insert response — fetch the event again to get it
+  if (!createdEvent.conferenceData?.entryPoints && !createdEvent.hangoutLink) {
+    try {
+      const getResponse = await calendar.events.get({
+        calendarId,
+        eventId: createdEvent.id,
+        conferenceDataVersion: 1,
+      });
+      createdEvent = getResponse.data;
+    } catch (e) {
+      console.error('Failed to re-fetch event for Meet link:', e.message);
+    }
+  }
+
+  const meetLink =
+    createdEvent.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri ||
+    createdEvent.hangoutLink ||
+    null;
+
+  console.log('Google Calendar event created:', createdEvent.id, '| Meet link:', meetLink);
 
   return {
     googleEventId: createdEvent.id,

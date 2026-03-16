@@ -76,7 +76,7 @@ export async function POST(req) {
       googleEventId = result.googleEventId;
       meetLink = result.meetLink;
     } catch (gcErr) {
-      console.error('Failed to create Google Calendar event:', gcErr.message);
+      console.error('Failed to create Google Calendar event:', gcErr.message, gcErr.response?.data || '');
     }
 
     // Mark slot as booked

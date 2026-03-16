@@ -15,10 +15,11 @@ import {
 } from "react-icons/fi";
 
 // ─── Status Config ──────────────────────────────────────────────────────────
-const APPLICATION_STATUSES = ["Pending", "Reviewed", "Schedule Interview", "Interview Scheduled", "Rejected", "Hired"];
+const APPLICATION_STATUSES = ["Pending", "Reviewed", "Invite to Interview", "Schedule Interview", "Interview Scheduled", "Rejected", "Hired"];
 const STATUS_STYLES = {
   Pending:               "bg-amber-50   text-amber-700   border-amber-200",
   Reviewed:              "bg-blue-50    text-blue-700    border-blue-200",
+  "Invite to Interview": "bg-orange-50  text-orange-700  border-orange-200",
   "Schedule Interview":  "bg-violet-50  text-violet-700  border-violet-200",
   "Interview Scheduled": "bg-purple-50  text-purple-700  border-purple-200",
   Rejected:              "bg-red-50     text-red-700     border-red-200",

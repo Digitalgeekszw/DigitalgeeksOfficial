@@ -48,7 +48,7 @@ export async function PATCH(req) {
       return NextResponse.json({ message: "ID and status are required." }, { status: 400 });
     }
 
-    const validStatuses = ["Pending", "Reviewed", "Schedule Interview", "Interview Scheduled", "Rejected", "Hired"];
+    const validStatuses = ["Pending", "Reviewed", "Invite to Interview", "Schedule Interview", "Interview Scheduled", "Rejected", "Hired"];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ message: "Invalid status value." }, { status: 400 });
     }
@@ -56,7 +56,8 @@ export async function PATCH(req) {
     const updateData = { status };
 
     // Generate a unique scheduling token when sending interview invite
-    if (status === "Schedule Interview") {
+    const sendsSchedulingLink = status === "Schedule Interview" || status === "Invite to Interview";
+    if (sendsSchedulingLink) {
       updateData.scheduleToken = randomUUID();
     }
 
@@ -66,7 +67,7 @@ export async function PATCH(req) {
     }
 
     try {
-      if (status === "Schedule Interview") {
+      if (sendsSchedulingLink) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://digitalgeeks.tech";
         const schedulingLink = `${appUrl}/interview/${updated.scheduleToken}`;
         await sendScheduleInterviewEmail({

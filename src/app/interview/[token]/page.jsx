@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 function formatDateTime(dateStr) {
   const d = new Date(dateStr);
@@ -79,15 +80,18 @@ export default function InterviewSchedulePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 mb-4 backdrop-blur-sm">
-            <span className="text-white font-black text-sm">DG</span>
+          <div className="inline-flex items-center justify-center mb-5">
+            <Image src="/logo.png" alt="Digital Geeks" width={160} height={48} className="object-contain brightness-0 invert" priority />
           </div>
-          <h1 className="text-2xl font-bold text-white">Digital Geeks</h1>
-          <p className="text-indigo-300 text-sm mt-1">Interview Scheduling</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 backdrop-blur-sm mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="text-indigo-300 text-xs font-semibold tracking-wide uppercase">Interview Scheduling</span>
+          </div>
+          <p className="text-slate-400 text-sm mt-1">digitalgeeks.tech</p>
         </div>
 
         <AnimatePresence mode="wait">
@@ -259,6 +263,12 @@ export default function InterviewSchedulePage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Footer */}
+        <p className="text-center text-slate-600 text-xs mt-8">
+          &copy; {new Date().getFullYear()} Digital Geeks &middot;{" "}
+          <a href="https://digitalgeeks.tech" className="hover:text-slate-400 transition-colors">digitalgeeks.tech</a>
+        </p>
       </div>
     </div>
   );
