@@ -166,7 +166,12 @@ function ApplicantsSection() {
     setLoading(false);
   }, [search, statusFilter]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+    // Auto-refresh every 30s so booked interviews reflect immediately
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const handleUpdateStatus = async (id, status) => {
     try {
