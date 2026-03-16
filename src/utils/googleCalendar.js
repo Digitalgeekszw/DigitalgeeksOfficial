@@ -1,45 +1,53 @@
 import { google } from 'googleapis';
 
-function getCalendarClient() {
-  const credentials = {
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  };
-
-  const auth = new google.auth.GoogleAuth({
-    credentials,
+function getAuth() {
+  return new google.auth.GoogleAuth({
+    credentials: {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    },
     scopes: [
       'https://www.googleapis.com/auth/calendar',
       'https://www.googleapis.com/auth/calendar.events',
     ],
   });
-
-  return google.calendar({ version: 'v3', auth });
 }
 
 /**
  * Creates a Google Calendar event with a Google Meet link.
- * @param {{ startTime: Date, endTime: Date, applicantName: string, applicantEmail: string, jobTitle: string }} params
- * @returns {{ googleEventId: string, meetLink: string }}
  */
 export async function createInterviewEvent({ startTime, endTime, applicantName, applicantEmail, jobTitle }) {
-  const calendar = getCalendarClient();
   const calendarId = process.env.GOOGLE_CALENDAR_ID;
+  const meetLink = process.env.GOOGLE_MEET_ROOM_URL || null;
+
+  const calendar = google.calendar({ version: 'v3', auth: getAuth() });
 
   const event = {
     summary: `Interview – ${applicantName} for ${jobTitle}`,
-    description: `Interview with ${applicantName} for the ${jobTitle} position at Digital Geeks.`,
-    start: { dateTime: startTime.toISOString(), timeZone: 'Africa/Harare' },
-    end:   { dateTime: endTime.toISOString(),   timeZone: 'Africa/Harare' },
+    description: [
+      `Interview with ${applicantName} for the ${jobTitle} position at Digital Geeks.`,
+      meetLink ? `\nJoin Google Meet: ${meetLink}` : '',
+    ].join(''),
+    start: { dateTime: new Date(startTime).toISOString(), timeZone: 'Africa/Harare' },
+    end:   { dateTime: new Date(endTime).toISOString(),   timeZone: 'Africa/Harare' },
+    location: meetLink || undefined,
     attendees: [
       { email: applicantEmail, displayName: applicantName },
     ],
-    conferenceData: {
-      createRequest: {
-        requestId: `dg-interview-${Date.now()}`,
-        conferenceSolutionKey: { type: 'hangoutsMeet' },
+    ...(meetLink && {
+      conferenceData: {
+        conferenceSolution: {
+          name: 'Google Meet',
+          key: { type: 'hangoutsMeet' },
+          iconUri: 'https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png',
+        },
+        entryPoints: [{
+          entryPointType: 'video',
+          uri: meetLink,
+          label: meetLink.replace('https://', ''),
+        }],
       },
-    },
+    }),
     reminders: {
       useDefault: false,
       overrides: [
@@ -49,47 +57,26 @@ export async function createInterviewEvent({ startTime, endTime, applicantName, 
     },
   };
 
-  const insertResponse = await calendar.events.insert({
+  const res = await calendar.events.insert({
     calendarId,
     resource: event,
-    conferenceDataVersion: 1,
+    conferenceDataVersion: meetLink ? 1 : 0,
     sendUpdates: 'all',
   });
 
-  let createdEvent = insertResponse.data;
+  console.log('Calendar event created:', res.data.id, '| Meet link:', meetLink);
 
-  // Meet link is sometimes not in the insert response — fetch the event again to get it
-  if (!createdEvent.conferenceData?.entryPoints && !createdEvent.hangoutLink) {
-    try {
-      const getResponse = await calendar.events.get({
-        calendarId,
-        eventId: createdEvent.id,
-        conferenceDataVersion: 1,
-      });
-      createdEvent = getResponse.data;
-    } catch (e) {
-      console.error('Failed to re-fetch event for Meet link:', e.message);
-    }
-  }
-
-  const meetLink =
-    createdEvent.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri ||
-    createdEvent.hangoutLink ||
-    null;
-
-  console.log('Google Calendar event created:', createdEvent.id, '| Meet link:', meetLink);
-
-  return {
-    googleEventId: createdEvent.id,
-    meetLink,
-  };
+  return { googleEventId: res.data.id, meetLink };
 }
 
 /**
  * Deletes a Google Calendar event by event ID.
  */
 export async function deleteInterviewEvent(googleEventId) {
-  const calendar = getCalendarClient();
-  const calendarId = process.env.GOOGLE_CALENDAR_ID;
-  await calendar.events.delete({ calendarId, eventId: googleEventId, sendUpdates: 'all' });
+  const calendar = google.calendar({ version: 'v3', auth: getAuth() });
+  await calendar.events.delete({
+    calendarId: process.env.GOOGLE_CALENDAR_ID,
+    eventId: googleEventId,
+    sendUpdates: 'all',
+  });
 }

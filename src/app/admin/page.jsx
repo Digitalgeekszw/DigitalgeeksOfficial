@@ -173,6 +173,9 @@ function ApplicantsSection() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  const [resending, setResending] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
+
   const handleUpdateStatus = async (id, status) => {
     try {
       await fetch("/api/admin/applicants", {
@@ -183,6 +186,21 @@ function ApplicantsSection() {
       fetchData();
       if (selected?._id === id) setSelected(prev => ({ ...prev, status }));
     } catch (e) { console.error(e); }
+  };
+
+  const handleResendInterview = async (id) => {
+    setResending(true);
+    setResendDone(false);
+    try {
+      await fetch("/api/admin/resend-interview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      setResendDone(true);
+      setTimeout(() => setResendDone(false), 3000);
+    } catch (e) { console.error(e); }
+    setResending(false);
   };
 
   return (
@@ -266,6 +284,16 @@ function ApplicantsSection() {
         footer={(
           <>
             <button onClick={() => setSelected(null)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Close</button>
+            {selected?.status === "Interview Scheduled" && (
+              <button
+                onClick={() => handleResendInterview(selected._id)}
+                disabled={resending}
+                className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+              >
+                <FiMail size={15} />
+                {resendDone ? "Sent!" : resending ? "Sending..." : "Resend Meet Details"}
+              </button>
+            )}
             {selected?.resumeUrl && (
               <a href={selected.resumeUrl} target="_blank" rel="noreferrer" className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-600/20">
                 <FiExternalLink /> Download Resume
