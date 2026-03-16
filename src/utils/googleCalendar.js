@@ -31,9 +31,6 @@ export async function createInterviewEvent({ startTime, endTime, applicantName, 
     start: { dateTime: new Date(startTime).toISOString(), timeZone: 'Africa/Harare' },
     end:   { dateTime: new Date(endTime).toISOString(),   timeZone: 'Africa/Harare' },
     location: meetLink || undefined,
-    attendees: [
-      { email: applicantEmail, displayName: applicantName },
-    ],
     ...(meetLink && {
       conferenceData: {
         conferenceSolution: {
