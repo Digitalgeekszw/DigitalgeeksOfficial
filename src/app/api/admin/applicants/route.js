@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import connectDB from "../../../../lib/mongodb";
 import JobApplication from "../../../../models/JobApplication";
-import { sendApplicationStatusEmail } from "../../../../utils/email";
+import { sendApplicationStatusEmail, sendScheduleInterviewEmail } from "../../../../utils/email";
 
 export async function GET(req) {
   try {
@@ -47,24 +48,43 @@ export async function PATCH(req) {
       return NextResponse.json({ message: "ID and status are required." }, { status: 400 });
     }
 
-    const validStatuses = ["Pending", "Reviewed", "Interview Scheduled", "Rejected", "Hired"];
+    const validStatuses = ["Pending", "Reviewed", "Schedule Interview", "Interview Scheduled", "Rejected", "Hired"];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ message: "Invalid status value." }, { status: 400 });
     }
 
-    const updated = await JobApplication.findByIdAndUpdate(id, { status }, { new: true });
+    const updateData = { status };
+
+    // Generate a unique scheduling token when sending interview invite
+    if (status === "Schedule Interview") {
+      updateData.scheduleToken = randomUUID();
+    }
+
+    const updated = await JobApplication.findByIdAndUpdate(id, updateData, { new: true });
     if (!updated) {
       return NextResponse.json({ message: "Application not found." }, { status: 404 });
     }
 
     try {
-      await sendApplicationStatusEmail({
-        firstName: updated.firstName,
-        lastName: updated.lastName,
-        email: updated.email,
-        jobTitle: updated.jobTitle,
-        status: updated.status,
-      });
+      if (status === "Schedule Interview") {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://digitalgeeks.tech";
+        const schedulingLink = `${appUrl}/interview/${updated.scheduleToken}`;
+        await sendScheduleInterviewEmail({
+          firstName: updated.firstName,
+          lastName: updated.lastName,
+          email: updated.email,
+          jobTitle: updated.jobTitle,
+          schedulingLink,
+        });
+      } else {
+        await sendApplicationStatusEmail({
+          firstName: updated.firstName,
+          lastName: updated.lastName,
+          email: updated.email,
+          jobTitle: updated.jobTitle,
+          status: updated.status,
+        });
+      }
     } catch (emailErr) {
       console.error("Failed to send status email:", emailErr.message);
     }

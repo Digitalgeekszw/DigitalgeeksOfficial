@@ -34,9 +34,11 @@ const JobApplicationSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Reviewed', 'Interview Scheduled', 'Rejected', 'Hired'],
+    enum: ['Pending', 'Reviewed', 'Schedule Interview', 'Interview Scheduled', 'Rejected', 'Hired'],
     default: 'Pending',
-  }
+  },
+  scheduleToken: { type: String, default: null },
+  interviewSlot: { type: mongoose.Schema.Types.ObjectId, ref: 'InterviewSlot', default: null },
 }, { timestamps: true });
 
 // Prevent recompilation issues in Next.js

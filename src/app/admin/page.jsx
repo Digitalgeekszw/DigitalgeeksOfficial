@@ -1,22 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  FiUsers, FiMail, FiBriefcase, FiGrid, FiPlus, 
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import {
+  FiUsers, FiMail, FiBriefcase, FiGrid, FiPlus,
   FiSearch, FiFilter, FiChevronRight, FiChevronLeft,
   FiMoreVertical, FiEdit2, FiTrash2, FiExternalLink,
-  FiCheckCircle, FiXCircle, FiClock, FiSettings, FiLogOut
+  FiCheckCircle, FiXCircle, FiClock, FiSettings, FiLogOut,
+  FiCalendar
 } from "react-icons/fi";
 
 // ─── Status Config ──────────────────────────────────────────────────────────
-const APPLICATION_STATUSES = ["Pending", "Reviewed", "Interview Scheduled", "Rejected", "Hired"];
+const APPLICATION_STATUSES = ["Pending", "Reviewed", "Schedule Interview", "Interview Scheduled", "Rejected", "Hired"];
 const STATUS_STYLES = {
-  Pending:             "bg-amber-50  text-amber-700  border-amber-200",
-  Reviewed:            "bg-blue-50   text-blue-700   border-blue-200",
-  "Interview Scheduled": "bg-purple-50 text-purple-700 border-purple-200",
-  Rejected:            "bg-red-50    text-red-700    border-red-200",
-  Hired:               "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Pending:               "bg-amber-50   text-amber-700   border-amber-200",
+  Reviewed:              "bg-blue-50    text-blue-700    border-blue-200",
+  "Schedule Interview":  "bg-violet-50  text-violet-700  border-violet-200",
+  "Interview Scheduled": "bg-purple-50  text-purple-700  border-purple-200",
+  Rejected:              "bg-red-50     text-red-700     border-red-200",
+  Hired:                 "bg-emerald-50 text-emerald-700 border-emerald-200",
 };
 
 // ─── Shared Components ───────────────────────────────────────────────────────
@@ -646,12 +652,271 @@ function ContactsSection() {
   );
 }
 
+// ─── Interview Slots Management ─────────────────────────────────────────────
+function InterviewSlotsSection() {
+  const [slots, setSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pendingSlot, setPendingSlot] = useState(null); // { start, end } before saving
+  const [saving, setSaving] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null); // slot clicked for detail/delete
+
+  const fetchSlots = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/interview-slots");
+      const data = await res.json();
+      setSlots(data.slots || []);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchSlots(); }, [fetchSlots]);
+
+  // Convert DB slots → FullCalendar events
+  const calendarEvents = slots.map(slot => ({
+    id: slot._id,
+    title: slot.isBooked
+      ? `Booked — ${slot.bookedBy?.firstName ?? ""} ${slot.bookedBy?.lastName ?? ""}`.trim()
+      : "Available",
+    start: slot.startTime,
+    end: slot.endTime,
+    backgroundColor: slot.isBooked ? "#7c3aed" : "#059669",
+    borderColor: slot.isBooked ? "#6d28d9" : "#047857",
+    extendedProps: slot,
+  }));
+
+  // Admin drags on empty space → preview confirm modal
+  const handleSelect = ({ start, end }) => {
+    setPendingSlot({ start, end });
+  };
+
+  const handleConfirmCreate = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/interview-slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          startTime: pendingSlot.start.toISOString(),
+          endTime: pendingSlot.end.toISOString(),
+        }),
+      });
+      if (res.ok) {
+        setPendingSlot(null);
+        fetchSlots();
+      }
+    } catch (e) { console.error(e); }
+    setSaving(false);
+  };
+
+  const handleEventClick = ({ event }) => {
+    setSelectedSlot(event.extendedProps);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this slot? If booked, the Google Calendar event will also be removed.")) return;
+    try {
+      await fetch(`/api/admin/interview-slots?id=${id}`, { method: "DELETE" });
+      setSelectedSlot(null);
+      fetchSlots();
+    } catch (e) { console.error(e); }
+  };
+
+  const fmt = (d) => new Date(d).toLocaleString("en-GB", {
+    weekday: "short", day: "numeric", month: "short",
+    hour: "2-digit", minute: "2-digit",
+  });
+
+  const fmtDuration = (start, end) => {
+    const mins = Math.round((new Date(end) - new Date(start)) / 60000);
+    return mins >= 60 ? `${mins / 60}h` : `${mins} min`;
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        title="Interview Slots"
+        description="Drag on the calendar to create an open slot. Click a slot to view or delete it."
+      />
+
+      {/* Legend */}
+      <div className="flex items-center gap-5 text-xs font-semibold text-slate-500">
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-600 inline-block" /> Available</span>
+        <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-violet-600 inline-block" /> Booked</span>
+        <span className="ml-auto text-slate-400 font-normal italic">Drag on any time block to open a slot</span>
+      </div>
+
+      {/* Calendar */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <style>{`
+          .fc { font-family: inherit; }
+          .fc-toolbar-title { font-size: 1rem !important; font-weight: 700; color: #0f172a; }
+          .fc-button { background: #f1f5f9 !important; border: 1px solid #e2e8f0 !important; color: #475569 !important; font-weight: 600 !important; border-radius: 8px !important; box-shadow: none !important; }
+          .fc-button:hover { background: #e2e8f0 !important; }
+          .fc-button-active { background: #4f46e5 !important; color: #fff !important; border-color: #4f46e5 !important; }
+          .fc-timegrid-slot { height: 36px !important; }
+          .fc-highlight { background: #e0e7ff !important; border-radius: 6px; }
+          .fc-event { border-radius: 6px !important; font-size: 11px !important; font-weight: 600 !important; padding: 2px 6px !important; cursor: pointer !important; }
+          .fc-col-header-cell { background: #f8fafc; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; border-color: #e2e8f0 !important; }
+          .fc-scrollgrid { border-radius: 0 !important; border-color: transparent !important; }
+          .fc-scrollgrid-section > td { border-color: #e2e8f0 !important; }
+          .fc-timegrid-slot-label { font-size: 11px; color: #94a3b8; }
+          .fc-toolbar { padding: 16px 20px !important; border-bottom: 1px solid #e2e8f0; }
+        `}</style>
+
+        {loading ? (
+          <div className="h-[640px] flex items-center justify-center text-slate-400">
+            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          </div>
+        ) : (
+          <FullCalendar
+            plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
+            initialView="timeGridWeek"
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title",
+              right: "timeGridWeek,timeGridDay",
+            }}
+            selectable={true}
+            selectMirror={true}
+            selectMinDistance={5}
+            events={calendarEvents}
+            select={handleSelect}
+            eventClick={handleEventClick}
+            slotMinTime="07:00:00"
+            slotMaxTime="20:00:00"
+            allDaySlot={false}
+            height={640}
+            nowIndicator={true}
+            weekends={true}
+            businessHours={{ daysOfWeek: [1,2,3,4,5], startTime: "08:00", endTime: "18:00" }}
+            slotLabelFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
+            eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
+          />
+        )}
+      </div>
+
+      {/* Confirm create modal */}
+      <Modal
+        isOpen={!!pendingSlot}
+        onClose={() => setPendingSlot(null)}
+        title="Create Interview Slot?"
+        footer={(
+          <>
+            <button onClick={() => setPendingSlot(null)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+            <button
+              onClick={handleConfirmCreate}
+              disabled={saving || !pendingSlot || (pendingSlot.end - pendingSlot.start) < 30 * 60 * 1000}
+              className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20 disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Create Slots"}
+            </button>
+          </>
+        )}
+      >
+        {pendingSlot && (() => {
+          const SLOT_MS = 30 * 60 * 1000;
+          const chunks = [];
+          let cursor = new Date(pendingSlot.start);
+          while (cursor.getTime() + SLOT_MS <= pendingSlot.end.getTime()) {
+            const slotEnd = new Date(cursor.getTime() + SLOT_MS);
+            chunks.push({ start: new Date(cursor), end: slotEnd });
+            cursor = slotEnd;
+          }
+          const fmtTime = (d) => new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+          return (
+            <div className="space-y-4">
+              <p className="text-slate-600 text-sm">
+                Your availability window will be split into <strong>{chunks.length} × 30-min slot{chunks.length !== 1 ? "s" : ""}</strong>. Each candidate picks one.
+              </p>
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {chunks.map((c, i) => (
+                  <div key={i} className="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-lg px-4 py-2 text-sm">
+                    <span className="text-slate-500 text-xs font-semibold">Slot {i + 1}</span>
+                    <span className="font-bold text-slate-900">{fmtTime(c.start)} – {fmtTime(c.end)}</span>
+                    <span className="text-emerald-600 text-xs font-semibold">30 min</span>
+                  </div>
+                ))}
+                {chunks.length === 0 && (
+                  <p className="text-red-500 text-sm text-center py-2">Window is less than 30 minutes — please drag a longer block.</p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
+
+      {/* Slot detail / delete modal */}
+      <Modal
+        isOpen={!!selectedSlot}
+        onClose={() => setSelectedSlot(null)}
+        title="Slot Details"
+        footer={(
+          <>
+            <button onClick={() => setSelectedSlot(null)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Close</button>
+            {!selectedSlot?.isBooked && (
+              <button onClick={() => handleDelete(selectedSlot._id)} className="px-4 py-2 text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center gap-2">
+                <FiTrash2 size={15} /> Delete Slot
+              </button>
+            )}
+            {selectedSlot?.meetLink && (
+              <a href={selectedSlot.meetLink} target="_blank" rel="noreferrer" className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-600/20">
+                <FiExternalLink size={14} /> Join Meet
+              </a>
+            )}
+          </>
+        )}
+      >
+        {selectedSlot && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${selectedSlot.isBooked ? "bg-violet-600" : "bg-emerald-500"}`} />
+              <span className={`text-sm font-bold ${selectedSlot.isBooked ? "text-violet-700" : "text-emerald-700"}`}>
+                {selectedSlot.isBooked ? "Booked" : "Available"}
+              </span>
+            </div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Start</span>
+                <span className="font-bold text-slate-900">{fmt(selectedSlot.startTime)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">End</span>
+                <span className="font-bold text-slate-900">{fmt(selectedSlot.endTime)}</span>
+              </div>
+              <div className="flex justify-between text-sm border-t border-slate-200 pt-2">
+                <span className="text-slate-400">Duration</span>
+                <span className="font-bold text-slate-900">{fmtDuration(selectedSlot.startTime, selectedSlot.endTime)}</span>
+              </div>
+            </div>
+            {selectedSlot.isBooked && selectedSlot.bookedBy && (
+              <div className="bg-violet-50 border border-violet-100 rounded-xl p-4 space-y-1">
+                <p className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Booked By</p>
+                <p className="font-bold text-slate-900">{selectedSlot.bookedBy.firstName} {selectedSlot.bookedBy.lastName}</p>
+                <p className="text-slate-500 text-sm">{selectedSlot.bookedBy.email}</p>
+                <p className="text-slate-400 text-xs">{selectedSlot.bookedBy.jobTitle}</p>
+              </div>
+            )}
+            {selectedSlot.meetLink && (
+              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Google Meet</p>
+                <a href={selectedSlot.meetLink} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline text-sm break-all">{selectedSlot.meetLink}</a>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
+
 // ─── Main Sidebar Navigation ────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { id: "dashboard",  label: "Overview",   icon: FiGrid },
-  { id: "applicants", label: "Applicants", icon: FiUsers },
-  { id: "contacts",   label: "Contacts",   icon: FiMail },
-  { id: "jobs",       label: "Jobs",       icon: FiBriefcase },
+  { id: "dashboard",  label: "Overview",        icon: FiGrid },
+  { id: "applicants", label: "Applicants",      icon: FiUsers },
+  { id: "contacts",   label: "Contacts",        icon: FiMail },
+  { id: "jobs",       label: "Jobs",            icon: FiBriefcase },
+  { id: "slots",      label: "Interview Slots", icon: FiCalendar },
 ];
 
 export default function RevolutAdminPanel() {
@@ -774,6 +1039,7 @@ export default function RevolutAdminPanel() {
               {activeTab === "applicants" && <ApplicantsSection />}
               {activeTab === "contacts" && <ContactsSection />}
               {activeTab === "jobs" && <JobsSection />}
+              {activeTab === "slots" && <InterviewSlotsSection />}
             </motion.div>
           </AnimatePresence>
         </div>
