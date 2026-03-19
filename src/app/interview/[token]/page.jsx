@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
@@ -25,6 +25,8 @@ function formatDuration(start, end) {
 
 export default function InterviewSchedulePage() {
   const { token } = useParams();
+  const searchParams = useSearchParams();
+  const isReschedule = searchParams.get("reschedule") === "true";
   const [state, setState] = useState("loading"); // loading | select | booked | error | invalid
   const [slots, setSlots] = useState([]);
   const [applicant, setApplicant] = useState(null);
@@ -35,7 +37,7 @@ export default function InterviewSchedulePage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch(`/api/interview/book?token=${token}`)
+    fetch(`/api/interview/book?token=${token}${isReschedule ? "&reschedule=true" : ""}`)
       .then(res => res.json())
       .then(data => {
         if (data.alreadyBooked) {
@@ -62,7 +64,7 @@ export default function InterviewSchedulePage() {
       const res = await fetch("/api/interview/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, slotId: selectedSlot._id }),
+        body: JSON.stringify({ token, slotId: selectedSlot._id, reschedule: isReschedule }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -109,10 +111,16 @@ export default function InterviewSchedulePage() {
             <motion.div key="select" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
               className="bg-white rounded-2xl shadow-2xl overflow-hidden">
               <div className="px-8 py-6 border-b border-slate-100">
-                <h2 className="text-xl font-bold text-slate-900">Choose Your Interview Slot</h2>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {isReschedule ? "Choose a New Interview Slot" : "Choose Your Interview Slot"}
+                </h2>
                 {applicant && (
                   <p className="text-slate-500 text-sm mt-1">
-                    Hi <strong>{applicant.firstName}</strong>, please select a time that works best for you for the <strong>{applicant.jobTitle}</strong> interview.
+                    Hi <strong>{applicant.firstName}</strong>,
+                    {isReschedule
+                      ? <> please select a <strong>new time</strong> for your <strong>{applicant.jobTitle}</strong> interview. Your previous slot has been released.</>
+                      : <> please select a time that works best for you for the <strong>{applicant.jobTitle}</strong> interview.</>
+                    }
                   </p>
                 )}
               </div>

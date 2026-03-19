@@ -11,7 +11,8 @@ import {
   FiSearch, FiFilter, FiChevronRight, FiChevronLeft,
   FiMoreVertical, FiEdit2, FiTrash2, FiExternalLink,
   FiCheckCircle, FiXCircle, FiClock, FiSettings, FiLogOut,
-  FiCalendar
+  FiCalendar,
+  FiRefreshCw,
 } from "react-icons/fi";
 
 // ─── Status Config ──────────────────────────────────────────────────────────
@@ -175,6 +176,24 @@ function ApplicantsSection() {
 
   const [resending, setResending] = useState(false);
   const [resendDone, setResendDone] = useState(false);
+  const [rescheduling, setRescheduling] = useState(false);
+  const [rescheduleDone, setRescheduleDone] = useState(false);
+
+  const handleSendReschedule = async (id) => {
+    setRescheduling(true);
+    setRescheduleDone(false);
+    try {
+      await fetch("/api/admin/reschedule-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      setRescheduleDone(true);
+      fetchData();
+      setTimeout(() => setRescheduleDone(false), 3000);
+    } catch (e) { console.error(e); }
+    setRescheduling(false);
+  };
 
   const handleUpdateStatus = async (id, status) => {
     try {
@@ -285,14 +304,24 @@ function ApplicantsSection() {
           <>
             <button onClick={() => setSelected(null)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Close</button>
             {selected?.status === "Interview Scheduled" && (
-              <button
-                onClick={() => handleResendInterview(selected._id)}
-                disabled={resending}
-                className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50"
-              >
-                <FiCalendar size={15} />
-                {resendDone ? "Added!" : resending ? "Adding..." : "Add to Calendar"}
-              </button>
+              <>
+                <button
+                  onClick={() => handleResendInterview(selected._id)}
+                  disabled={resending}
+                  className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+                >
+                  <FiCalendar size={15} />
+                  {resendDone ? "Added!" : resending ? "Adding..." : "Add to Calendar"}
+                </button>
+                <button
+                  onClick={() => handleSendReschedule(selected._id)}
+                  disabled={rescheduling}
+                  className="px-5 py-2 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors flex items-center gap-2 shadow-lg shadow-amber-500/20 disabled:opacity-50"
+                >
+                  <FiRefreshCw size={15} />
+                  {rescheduleDone ? "Sent!" : rescheduling ? "Sending..." : "Send Reschedule Link"}
+                </button>
+              </>
             )}
             {selected?.resumeUrl && (
               <a href={selected.resumeUrl} target="_blank" rel="noreferrer" className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-600/20">

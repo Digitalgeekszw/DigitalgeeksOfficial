@@ -132,6 +132,96 @@ export async function sendScheduleInterviewEmail({ firstName, lastName, email, j
   });
 }
 
+export async function sendRescheduleInviteEmail({ firstName, lastName, email, jobTitle, schedulingLink }) {
+  const fullName = `${firstName} ${lastName}`;
+  const subject = "Reschedule Your Interview – Digital Geeks";
+
+  const text = [
+    `Dear ${fullName},`,
+    ``,
+    `We need to reschedule your upcoming interview for the ${jobTitle} position.`,
+    ``,
+    `Please use the link below to select a new time slot that works best for you:`,
+    `${schedulingLink}`,
+    ``,
+    `Once you book a new slot, you will receive a confirmation email with your Google Meet link.`,
+    ``,
+    `If you have any questions, feel free to reply to this email or contact us at careers@digitalgeeks.tech.`,
+    ``,
+    `--`,
+    `Digital Geeks — Technology & Innovation`,
+    `© ${new Date().getFullYear()} Digital Geeks. All rights reserved.`,
+  ].join("\n");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background-color:#0f172a;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">Digital Geeks</h1>
+              <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Technology &amp; Innovation</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 16px;color:#0f172a;font-size:20px;">Interview Reschedule Request</h2>
+              <p style="margin:0 0 12px;color:#374151;font-size:15px;line-height:1.6;">Dear ${fullName},</p>
+              <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.6;">We need to reschedule your upcoming interview for the <strong>${jobTitle}</strong> position. We apologise for any inconvenience caused.</p>
+              <p style="margin:0 0 24px;color:#374151;font-size:15px;line-height:1.6;">Please click the button below to select a new time slot. Once booked, you will receive a <strong>Google Meet link</strong> to join the interview.</p>
+              <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                <tr>
+                  <td style="border-radius:8px;background-color:#f59e0b;">
+                    <a href="${schedulingLink}" target="_blank" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;">
+                      Choose a New Interview Slot
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;color:#94a3b8;font-size:13px;">Or copy this link into your browser:</p>
+              <p style="margin:0 0 20px;word-break:break-all;"><a href="${schedulingLink}" style="color:#3b82f6;font-size:13px;text-decoration:none;">${schedulingLink}</a></p>
+              <table cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;width:100%;margin-bottom:20px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 4px;color:#64748b;font-size:13px;">Position Applied For</p>
+                    <p style="margin:0;color:#0f172a;font-size:15px;font-weight:600;">${jobTitle}</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0;color:#374151;font-size:15px;line-height:1.6;">If you have any questions, feel free to reply to this email or contact us at <a href="mailto:careers@digitalgeeks.tech" style="color:#3b82f6;text-decoration:none;">careers@digitalgeeks.tech</a>.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center;">
+              <p style="margin:0;color:#94a3b8;font-size:12px;">&copy; ${new Date().getFullYear()} Digital Geeks. All rights reserved.</p>
+              <p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">This email was sent regarding your job application.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  await resend.emails.send({
+    from: "Digital Geeks Careers <careers@digitalgeeks.tech>",
+    reply_to: "careers@digitalgeeks.tech",
+    to: email,
+    subject,
+    text,
+    html,
+  });
+}
+
 export async function sendInterviewConfirmationEmail({ firstName, lastName, email, jobTitle, startTime, meetLink }) {
   const fullName = `${firstName} ${lastName}`;
   const subject = "Interview Confirmed – Digital Geeks";

@@ -42,7 +42,7 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     await connectDB();
-    const { token, slotId } = await req.json();
+    const { token, slotId, reschedule } = await req.json();
 
     if (!token || !slotId) {
       return NextResponse.json({ message: 'Token and slotId are required.' }, { status: 400 });
@@ -53,8 +53,16 @@ export async function POST(req) {
       return NextResponse.json({ message: 'Invalid or expired scheduling link.' }, { status: 404 });
     }
 
-    if (application.interviewSlot) {
+    if (application.interviewSlot && !reschedule) {
       return NextResponse.json({ message: 'You have already booked an interview slot.' }, { status: 409 });
+    }
+
+    // Free old slot if rescheduling
+    if (application.interviewSlot && reschedule) {
+      await InterviewSlot.findByIdAndUpdate(application.interviewSlot, {
+        isBooked: false, bookedBy: null, googleEventId: null, meetLink: null,
+      });
+      application.interviewSlot = null;
     }
 
     const slot = await InterviewSlot.findById(slotId);
