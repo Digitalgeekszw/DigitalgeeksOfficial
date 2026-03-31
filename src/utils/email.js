@@ -390,3 +390,129 @@ export async function sendApplicationStatusEmail({ firstName, lastName, email, j
     html,
   });
 }
+
+export async function sendAcceptanceContractEmail({
+  firstName,
+  lastName,
+  email,
+  jobTitle,
+  signingLink,
+  adminName,
+  adminTitle,
+  adminDate,
+}) {
+  const fullName = `${firstName} ${lastName}`.trim();
+  const subject = `Internship Acceptance Letter - Digital Geeks`;
+  const signedDateLabel = new Date(adminDate).toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const text = [
+    `Digital Geeks`,
+    `www.digitalgeeks.tech`,
+    `Email: contact@digitalgeeks.tech`,
+    ``,
+    `Date: ${signedDateLabel}`,
+    ``,
+    `To: ${fullName}`,
+    `Subject: Internship Acceptance Letter`,
+    ``,
+    `Dear ${fullName},`,
+    ``,
+    `We are pleased to inform you that you have been selected for the ${jobTitle} internship role at Digital Geeks.`,
+    `This letter serves as your internship acceptance agreement and outlines your formal acceptance into our team.`,
+    ``,
+    `Please review and sign your acceptance letter using the secure link below:`,
+    `${signingLink}`,
+    ``,
+    `If you have any questions, contact us at contact@digitalgeeks.tech or visit www.digitalgeeks.tech.`,
+    ``,
+    `For Digital Geeks`,
+    `${adminName}`,
+    `${adminTitle}`,
+    `Date: ${signedDateLabel}`,
+  ].join("\n");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:24px;background-color:#f5f7fb;font-family:'Times New Roman',Georgia,serif;color:#111827;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:760px;margin:0 auto;background:#ffffff;border:1px solid #d1d5db;">
+    <tr>
+      <td style="padding:0;">
+        <img src="https://www.digitalgeeks.tech/contract-letterhead.svg" alt="DigitalGeeks Letterhead" style="width:100%;max-width:760px;height:auto;display:block;" />
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding:28px 40px 38px;">
+        <p style="margin:0 0 8px;font-size:15px;"><strong>Date:</strong> ${signedDateLabel}</p>
+        <p style="margin:0 0 14px;font-size:15px;"><strong>To:</strong> ${fullName}</p>
+        <p style="margin:0 0 24px;font-size:15px;"><strong>Subject:</strong> Internship Acceptance Letter</p>
+
+        <p style="margin:0 0 14px;font-size:16px;line-height:1.7;">Dear ${fullName},</p>
+
+        <p style="margin:0 0 14px;font-size:16px;line-height:1.8;">We are pleased to inform you that you have been selected for the <strong>${jobTitle}</strong> internship role at Digital Geeks.</p>
+        <p style="margin:0 0 14px;font-size:16px;line-height:1.8;">This letter serves as your internship acceptance agreement and confirms your formal selection into our program.</p>
+        <p style="margin:0 0 18px;font-size:16px;line-height:1.8;">Kindly review this letter and submit your acceptance by signing electronically using the secure link below.</p>
+
+        <table cellpadding="0" cellspacing="0" style="margin:0 0 22px;">
+          <tr>
+            <td style="border-radius:4px;background-color:#1e3a8a;">
+              <a href="${signingLink}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">
+                Review and Sign Acceptance Letter
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:0 0 22px;font-size:14px;color:#475569;word-break:break-all;">If the button does not work, use this link:<br /><a href="${signingLink}" style="color:#1e40af;text-decoration:none;">${signingLink}</a></p>
+
+        <p style="margin:0 0 22px;font-size:16px;line-height:1.8;">If you need any clarification, please contact us at <a href="mailto:contact@digitalgeeks.tech" style="color:#1e40af;text-decoration:none;">contact@digitalgeeks.tech</a> or visit <a href="https://www.digitalgeeks.tech" style="color:#1e40af;text-decoration:none;">www.digitalgeeks.tech</a>.</p>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:26px;">
+          <tr>
+            <td style="width:50%;vertical-align:top;padding-right:12px;">
+              <p style="margin:0 0 6px;font-size:14px;color:#64748b;">Authorized by (Digital Geeks)</p>
+              <p style="margin:0 0 20px;font-size:16px;">${adminName}</p>
+              <p style="margin:0 0 6px;font-size:14px;color:#64748b;">Title</p>
+              <p style="margin:0 0 20px;font-size:16px;">${adminTitle}</p>
+              <p style="margin:0 0 6px;font-size:14px;color:#64748b;">Date</p>
+              <p style="margin:0;font-size:16px;">${signedDateLabel}</p>
+            </td>
+            <td style="width:50%;vertical-align:top;padding-left:12px;">
+              <p style="margin:0 0 6px;font-size:14px;color:#64748b;">Candidate Signature</p>
+              <p style="margin:0 0 20px;border-bottom:1px solid #cbd5e1;height:22px;"></p>
+              <p style="margin:0 0 6px;font-size:14px;color:#64748b;">Candidate Name</p>
+              <p style="margin:0 0 20px;border-bottom:1px solid #cbd5e1;height:22px;"></p>
+              <p style="margin:0 0 6px;font-size:14px;color:#64748b;">Date</p>
+              <p style="margin:0;border-bottom:1px solid #cbd5e1;height:22px;"></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:0;">
+        <img src="https://www.digitalgeeks.tech/contract-footer.svg" alt="DigitalGeeks Footer" style="width:100%;max-width:760px;height:auto;display:block;" />
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  await resend.emails.send({
+    from: "Digital Geeks Careers <careers@digitalgeeks.tech>",
+    reply_to: "contact@digitalgeeks.tech",
+    to: email,
+    subject,
+    text,
+    html,
+  });
+}

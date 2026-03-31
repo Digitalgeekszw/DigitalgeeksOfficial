@@ -178,6 +178,14 @@ function ApplicantsSection() {
   const [resendDone, setResendDone] = useState(false);
   const [rescheduling, setRescheduling] = useState(false);
   const [rescheduleDone, setRescheduleDone] = useState(false);
+  const [contractModalOpen, setContractModalOpen] = useState(false);
+  const [contractSending, setContractSending] = useState(false);
+  const [contractDone, setContractDone] = useState(false);
+  const [contractForm, setContractForm] = useState({
+    adminName: "",
+    adminTitle: "",
+    adminDate: new Date().toISOString().slice(0, 10),
+  });
 
   const handleSendReschedule = async (id) => {
     setRescheduling(true);
@@ -220,6 +228,50 @@ function ApplicantsSection() {
       setTimeout(() => setResendDone(false), 3000);
     } catch (e) { console.error(e); }
     setResending(false);
+  };
+
+  const handleSendAcceptanceContract = async () => {
+    if (!selected?._id) return;
+
+    setContractSending(true);
+    setContractDone(false);
+    try {
+      const res = await fetch("/api/admin/send-contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selected._id,
+          adminName: contractForm.adminName,
+          adminTitle: contractForm.adminTitle,
+          adminDate: contractForm.adminDate,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.message || "Failed to send acceptance contract.");
+      }
+
+      setContractDone(true);
+      setContractModalOpen(false);
+      fetchData();
+      setSelected((prev) => prev ? ({
+        ...prev,
+        status: "Hired",
+        acceptanceContract: {
+          ...(prev.acceptanceContract || {}),
+          adminName: contractForm.adminName,
+          adminTitle: contractForm.adminTitle,
+          adminDate: contractForm.adminDate,
+          candidateAccepted: false,
+        },
+      }) : prev);
+      setTimeout(() => setContractDone(false), 3000);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "Unable to send acceptance contract.");
+    }
+    setContractSending(false);
   };
 
   return (
@@ -323,6 +375,23 @@ function ApplicantsSection() {
                 </button>
               </>
             )}
+            {(selected?.status === "Hired" || selected?.acceptanceContract?.sentAt) && (
+              <button
+                onClick={() => {
+                  setContractForm((prev) => ({
+                    adminName: selected?.acceptanceContract?.adminName || prev.adminName,
+                    adminTitle: selected?.acceptanceContract?.adminTitle || prev.adminTitle,
+                    adminDate: selected?.acceptanceContract?.adminDate
+                      ? new Date(selected.acceptanceContract.adminDate).toISOString().slice(0, 10)
+                      : prev.adminDate,
+                  }));
+                  setContractModalOpen(true);
+                }}
+                className="px-5 py-2 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors flex items-center gap-2"
+              >
+                {contractDone ? "Sent!" : "Send Acceptance Contract"}
+              </button>
+            )}
             {selected?.resumeUrl && (
               <a href={selected.resumeUrl} target="_blank" rel="noreferrer" className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-600/20">
                 <FiExternalLink /> Download Resume
@@ -380,8 +449,81 @@ function ApplicantsSection() {
                 ))}
               </div>
             </div>
+
+            {selected.acceptanceContract?.sentAt && (
+              <div className="space-y-2 pt-2">
+                <p className="text-slate-400 text-xs uppercase tracking-wider font-bold">Acceptance Contract</p>
+                <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 text-sm">
+                  <p className="text-slate-700">
+                    Sent: {new Date(selected.acceptanceContract.sentAt).toLocaleString()}
+                  </p>
+                  <p className="text-slate-700">
+                    Signed by candidate: {selected.acceptanceContract.candidateAccepted ? "Yes" : "No"}
+                  </p>
+                  {selected.acceptanceContract.candidateAccepted && (
+                    <p className="text-slate-700">
+                      Signed name: {selected.acceptanceContract.candidateSignedName || "-"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
+      </Modal>
+
+      <Modal
+        isOpen={contractModalOpen}
+        onClose={() => setContractModalOpen(false)}
+        title="Send Acceptance Contract"
+        footer={(
+          <>
+            <button onClick={() => setContractModalOpen(false)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+            <button
+              onClick={handleSendAcceptanceContract}
+              disabled={contractSending || !contractForm.adminName || !contractForm.adminTitle || !contractForm.adminDate}
+              className="px-5 py-2 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50"
+            >
+              {contractSending ? "Sending..." : "Send Contract"}
+            </button>
+          </>
+        )}
+      >
+        <div className="space-y-4 text-sm">
+          <p className="text-slate-600">
+            This sends an internal Digital Geeks acceptance letter to {selected?.firstName} {selected?.lastName} for online signing.
+          </p>
+
+          <label className="block">
+            <span className="text-slate-700 font-semibold">Admin Full Name</span>
+            <input
+              value={contractForm.adminName}
+              onChange={(e) => setContractForm(prev => ({ ...prev, adminName: e.target.value }))}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
+              placeholder="e.g. Tawanda Moyo"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-slate-700 font-semibold">Admin Title</span>
+            <input
+              value={contractForm.adminTitle}
+              onChange={(e) => setContractForm(prev => ({ ...prev, adminTitle: e.target.value }))}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
+              placeholder="e.g. Head of People"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-slate-700 font-semibold">Contract Date</span>
+            <input
+              type="date"
+              value={contractForm.adminDate}
+              onChange={(e) => setContractForm(prev => ({ ...prev, adminDate: e.target.value }))}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
+            />
+          </label>
+        </div>
       </Modal>
     </div>
   );
