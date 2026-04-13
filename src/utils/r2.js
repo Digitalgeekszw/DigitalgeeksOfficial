@@ -28,7 +28,7 @@ if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
  * @param {string} mimeType The mime type of the file
  * @returns {Promise<string>} The public URL of the uploaded file
  */
-export async function uploadToR2(fileBuffer, originalFilename, mimeType) {
+export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder = 'resumes') {
   if (!s3Client) {
     throw new Error('R2 credentials are not configured in environment variables');
   }
@@ -41,7 +41,7 @@ export async function uploadToR2(fileBuffer, originalFilename, mimeType) {
   const extension = originalFilename.split('.').pop();
   const uniqueId = uuidv4();
   const safeFilename = originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_');
-  const fileKey = `resumes/${uniqueId}-${safeFilename}`;
+  const fileKey = `${folder}/${uniqueId}-${safeFilename}`;
 
   const command = new PutObjectCommand({
     Bucket: R2_BUCKET_NAME,

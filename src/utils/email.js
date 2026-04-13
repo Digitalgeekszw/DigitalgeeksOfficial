@@ -516,3 +516,157 @@ export async function sendAcceptanceContractEmail({
     html,
   });
 }
+
+export async function sendOfferLetterEmail({ firstName, lastName, email, jobTitle, fileBuffer, fileName }) {
+  const fullName = `${firstName} ${lastName}`.trim();
+  const subject = `Offer Letter – Digital Geeks`;
+
+  const text = [
+    `Dear ${fullName},`,
+    ``,
+    `We are delighted to offer you the position of ${jobTitle} at Digital Geeks.`,
+    ``,
+    `Please find your official offer letter attached to this email. Kindly review it carefully and respond at your earliest convenience.`,
+    ``,
+    `If you have any questions, feel free to contact us at careers@digitalgeeks.tech.`,
+    ``,
+    `--`,
+    `Digital Geeks — Technology & Innovation`,
+    `© ${new Date().getFullYear()} Digital Geeks. All rights reserved.`,
+  ].join("\n");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background-color:#0f172a;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">Digital Geeks</h1>
+              <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Technology &amp; Innovation</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 16px;color:#0f172a;font-size:20px;">Your Offer Letter</h2>
+              <p style="margin:0 0 12px;color:#374151;font-size:15px;line-height:1.6;">Dear ${fullName},</p>
+              <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.6;">We are delighted to offer you the position of <strong>${jobTitle}</strong> at Digital Geeks.</p>
+              <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.6;">Please find your official offer letter attached to this email. Kindly review it carefully and respond at your earliest convenience.</p>
+              <table cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;width:100%;margin-bottom:20px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 4px;color:#64748b;font-size:13px;">Position Offered</p>
+                    <p style="margin:0;color:#0f172a;font-size:15px;font-weight:600;">${jobTitle}</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0;color:#374151;font-size:15px;line-height:1.6;">If you have any questions, feel free to contact us at <a href="mailto:careers@digitalgeeks.tech" style="color:#3b82f6;text-decoration:none;">careers@digitalgeeks.tech</a>.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center;">
+              <p style="margin:0;color:#94a3b8;font-size:12px;">&copy; ${new Date().getFullYear()} Digital Geeks. All rights reserved.</p>
+              <p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">This email was sent regarding your job application.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  await resend.emails.send({
+    from: "Digital Geeks Careers <careers@digitalgeeks.tech>",
+    reply_to: "careers@digitalgeeks.tech",
+    to: email,
+    subject,
+    text,
+    html,
+    attachments: [{ filename: fileName, content: fileBuffer }],
+  });
+}
+
+export async function sendManualContractEmail({ firstName, lastName, email, jobTitle, fileBuffer, fileName }) {
+  const fullName = `${firstName} ${lastName}`.trim();
+  const subject = `Employment Contract – Digital Geeks`;
+
+  const text = [
+    `Dear ${fullName},`,
+    ``,
+    `Please find your employment contract for the ${jobTitle} position at Digital Geeks attached to this email.`,
+    ``,
+    `Kindly review the contract carefully, sign it, and return a signed copy to careers@digitalgeeks.tech.`,
+    ``,
+    `If you have any questions or require clarification, do not hesitate to contact us.`,
+    ``,
+    `--`,
+    `Digital Geeks — Technology & Innovation`,
+    `© ${new Date().getFullYear()} Digital Geeks. All rights reserved.`,
+  ].join("\n");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background-color:#0f172a;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">Digital Geeks</h1>
+              <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Technology &amp; Innovation</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 16px;color:#0f172a;font-size:20px;">Your Employment Contract</h2>
+              <p style="margin:0 0 12px;color:#374151;font-size:15px;line-height:1.6;">Dear ${fullName},</p>
+              <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.6;">Please find your employment contract for the <strong>${jobTitle}</strong> position at Digital Geeks attached to this email.</p>
+              <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.6;">Kindly review the contract carefully, sign it, and return a signed copy to <a href="mailto:careers@digitalgeeks.tech" style="color:#3b82f6;text-decoration:none;">careers@digitalgeeks.tech</a>.</p>
+              <table cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;width:100%;margin-bottom:20px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 4px;color:#64748b;font-size:13px;">Position</p>
+                    <p style="margin:0;color:#0f172a;font-size:15px;font-weight:600;">${jobTitle}</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0;color:#374151;font-size:15px;line-height:1.6;">If you have any questions, feel free to contact us at <a href="mailto:careers@digitalgeeks.tech" style="color:#3b82f6;text-decoration:none;">careers@digitalgeeks.tech</a>.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center;">
+              <p style="margin:0;color:#94a3b8;font-size:12px;">&copy; ${new Date().getFullYear()} Digital Geeks. All rights reserved.</p>
+              <p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">This email was sent regarding your job application.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  await resend.emails.send({
+    from: "Digital Geeks Careers <careers@digitalgeeks.tech>",
+    reply_to: "careers@digitalgeeks.tech",
+    to: email,
+    subject,
+    text,
+    html,
+    attachments: [{ filename: fileName, content: fileBuffer }],
+  });
+}

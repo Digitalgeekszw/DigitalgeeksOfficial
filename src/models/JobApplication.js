@@ -39,7 +39,13 @@ const JobApplicationSchema = new mongoose.Schema({
   },
   scheduleToken: { type: String, default: null },
   interviewSlot: { type: mongoose.Schema.Types.ObjectId, ref: 'InterviewSlot', default: null },
+  offerLetter: {
+    sentAt: { type: Date, default: null },
+    fileUrl: { type: String, default: '' },
+    fileName: { type: String, default: '' },
+  },
   acceptanceContract: {
+    type: { type: String, enum: ['generated', 'manual'], default: 'generated' },
     token: { type: String, default: null },
     sentAt: { type: Date, default: null },
     adminName: { type: String, default: '' },
@@ -48,6 +54,8 @@ const JobApplicationSchema = new mongoose.Schema({
     candidateSignedName: { type: String, default: '' },
     candidateSignedAt: { type: Date, default: null },
     candidateAccepted: { type: Boolean, default: false },
+    fileUrl: { type: String, default: '' },
+    fileName: { type: String, default: '' },
   },
 }, { timestamps: true });
 

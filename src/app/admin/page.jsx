@@ -178,9 +178,15 @@ function ApplicantsSection() {
   const [resendDone, setResendDone] = useState(false);
   const [rescheduling, setRescheduling] = useState(false);
   const [rescheduleDone, setRescheduleDone] = useState(false);
+  const [offerLetterModalOpen, setOfferLetterModalOpen] = useState(false);
+  const [offerLetterSending, setOfferLetterSending] = useState(false);
+  const [offerLetterDone, setOfferLetterDone] = useState(false);
+  const [offerLetterFile, setOfferLetterFile] = useState(null);
   const [contractModalOpen, setContractModalOpen] = useState(false);
   const [contractSending, setContractSending] = useState(false);
   const [contractDone, setContractDone] = useState(false);
+  const [contractType, setContractType] = useState("generated");
+  const [contractFile, setContractFile] = useState(null);
   const [contractForm, setContractForm] = useState({
     adminName: "",
     adminTitle: "",
@@ -230,46 +236,84 @@ function ApplicantsSection() {
     setResending(false);
   };
 
+  const handleSendOfferLetter = async () => {
+    if (!selected?._id || !offerLetterFile) return;
+    setOfferLetterSending(true);
+    setOfferLetterDone(false);
+    try {
+      const fd = new FormData();
+      fd.append("id", selected._id);
+      fd.append("file", offerLetterFile);
+      const res = await fetch("/api/admin/send-offer-letter", { method: "POST", body: fd });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.message || "Failed to send offer letter.");
+      }
+      setOfferLetterDone(true);
+      setOfferLetterModalOpen(false);
+      setOfferLetterFile(null);
+      fetchData();
+      setSelected((prev) => prev ? ({ ...prev, offerLetter: { sentAt: new Date(), fileName: offerLetterFile.name } }) : prev);
+      setTimeout(() => setOfferLetterDone(false), 3000);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "Unable to send offer letter.");
+    }
+    setOfferLetterSending(false);
+  };
+
   const handleSendAcceptanceContract = async () => {
     if (!selected?._id) return;
-
     setContractSending(true);
     setContractDone(false);
     try {
-      const res = await fetch("/api/admin/send-contract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selected._id,
-          adminName: contractForm.adminName,
-          adminTitle: contractForm.adminTitle,
-          adminDate: contractForm.adminDate,
-        }),
-      });
+      let res;
+      if (contractType === "manual") {
+        if (!contractFile) { setContractSending(false); return; }
+        const fd = new FormData();
+        fd.append("id", selected._id);
+        fd.append("file", contractFile);
+        res = await fetch("/api/admin/send-contract", { method: "POST", body: fd });
+      } else {
+        res = await fetch("/api/admin/send-contract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: selected._id,
+            adminName: contractForm.adminName,
+            adminTitle: contractForm.adminTitle,
+            adminDate: contractForm.adminDate,
+          }),
+        });
+      }
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data?.message || "Failed to send acceptance contract.");
+        throw new Error(data?.message || "Failed to send contract.");
       }
 
       setContractDone(true);
       setContractModalOpen(false);
+      setContractFile(null);
       fetchData();
       setSelected((prev) => prev ? ({
         ...prev,
         status: "Hired",
         acceptanceContract: {
           ...(prev.acceptanceContract || {}),
-          adminName: contractForm.adminName,
-          adminTitle: contractForm.adminTitle,
-          adminDate: contractForm.adminDate,
+          type: contractType,
+          adminName: contractType === "generated" ? contractForm.adminName : "",
+          adminTitle: contractType === "generated" ? contractForm.adminTitle : "",
+          adminDate: contractType === "generated" ? contractForm.adminDate : null,
+          fileName: contractType === "manual" ? contractFile?.name : "",
           candidateAccepted: false,
+          sentAt: new Date(),
         },
       }) : prev);
       setTimeout(() => setContractDone(false), 3000);
     } catch (e) {
       console.error(e);
-      alert(e.message || "Unable to send acceptance contract.");
+      alert(e.message || "Unable to send contract.");
     }
     setContractSending(false);
   };
@@ -375,9 +419,19 @@ function ApplicantsSection() {
                 </button>
               </>
             )}
+            {selected?.status === "Hired" && (
+              <button
+                onClick={() => { setOfferLetterFile(null); setOfferLetterModalOpen(true); }}
+                className="px-5 py-2 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition-colors flex items-center gap-2"
+              >
+                {offerLetterDone ? "Sent!" : selected?.offerLetter?.sentAt ? "Resend Offer Letter" : "Send Offer Letter"}
+              </button>
+            )}
             {(selected?.status === "Hired" || selected?.acceptanceContract?.sentAt) && (
               <button
                 onClick={() => {
+                  setContractType("generated");
+                  setContractFile(null);
                   setContractForm((prev) => ({
                     adminName: selected?.acceptanceContract?.adminName || prev.adminName,
                     adminTitle: selected?.acceptanceContract?.adminTitle || prev.adminTitle,
@@ -389,7 +443,7 @@ function ApplicantsSection() {
                 }}
                 className="px-5 py-2 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors flex items-center gap-2"
               >
-                {contractDone ? "Sent!" : "Send Acceptance Contract"}
+                {contractDone ? "Sent!" : selected?.acceptanceContract?.sentAt ? "Resend Contract" : "Send Contract"}
               </button>
             )}
             {selected?.resumeUrl && (
@@ -450,20 +504,39 @@ function ApplicantsSection() {
               </div>
             </div>
 
+            {selected.offerLetter?.sentAt && (
+              <div className="space-y-2 pt-2">
+                <p className="text-slate-400 text-xs uppercase tracking-wider font-bold">Offer Letter</p>
+                <div className="p-4 border border-amber-200 rounded-xl bg-amber-50 text-sm">
+                  <p className="text-slate-700">Sent: {new Date(selected.offerLetter.sentAt).toLocaleString()}</p>
+                  {selected.offerLetter.fileName && (
+                    <p className="text-slate-500 text-xs mt-1">File: {selected.offerLetter.fileName}</p>
+                  )}
+                </div>
+              </div>
+            )}
             {selected.acceptanceContract?.sentAt && (
               <div className="space-y-2 pt-2">
-                <p className="text-slate-400 text-xs uppercase tracking-wider font-bold">Acceptance Contract</p>
+                <p className="text-slate-400 text-xs uppercase tracking-wider font-bold">Contract</p>
                 <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 text-sm">
-                  <p className="text-slate-700">
-                    Sent: {new Date(selected.acceptanceContract.sentAt).toLocaleString()}
+                  <p className="text-slate-700">Sent: {new Date(selected.acceptanceContract.sentAt).toLocaleString()}</p>
+                  <p className="text-slate-500 text-xs mt-1">
+                    Type: {selected.acceptanceContract.type === "manual" ? "Manually attached PDF" : "System generated"}
                   </p>
-                  <p className="text-slate-700">
-                    Signed by candidate: {selected.acceptanceContract.candidateAccepted ? "Yes" : "No"}
-                  </p>
-                  {selected.acceptanceContract.candidateAccepted && (
-                    <p className="text-slate-700">
-                      Signed name: {selected.acceptanceContract.candidateSignedName || "-"}
-                    </p>
+                  {selected.acceptanceContract.type === "manual" && selected.acceptanceContract.fileName && (
+                    <p className="text-slate-500 text-xs">File: {selected.acceptanceContract.fileName}</p>
+                  )}
+                  {selected.acceptanceContract.type !== "manual" && (
+                    <>
+                      <p className="text-slate-700 mt-1">
+                        Signed by candidate: {selected.acceptanceContract.candidateAccepted ? "Yes" : "No"}
+                      </p>
+                      {selected.acceptanceContract.candidateAccepted && (
+                        <p className="text-slate-700">
+                          Signed name: {selected.acceptanceContract.candidateSignedName || "-"}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -472,16 +545,58 @@ function ApplicantsSection() {
         )}
       </Modal>
 
+      {/* ── Offer Letter Modal ──────────────────────────────────────── */}
       <Modal
-        isOpen={contractModalOpen}
-        onClose={() => setContractModalOpen(false)}
-        title="Send Acceptance Contract"
+        isOpen={offerLetterModalOpen}
+        onClose={() => { setOfferLetterModalOpen(false); setOfferLetterFile(null); }}
+        title="Send Offer Letter"
         footer={(
           <>
-            <button onClick={() => setContractModalOpen(false)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+            <button onClick={() => { setOfferLetterModalOpen(false); setOfferLetterFile(null); }} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+            <button
+              onClick={handleSendOfferLetter}
+              disabled={offerLetterSending || !offerLetterFile}
+              className="px-5 py-2 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition-colors disabled:opacity-50"
+            >
+              {offerLetterSending ? "Sending..." : "Send Offer Letter"}
+            </button>
+          </>
+        )}
+      >
+        <div className="space-y-4 text-sm">
+          <p className="text-slate-600">
+            Attach a PDF offer letter to send to <strong>{selected?.firstName} {selected?.lastName}</strong>. The file will be emailed directly as an attachment.
+          </p>
+          <label className="block">
+            <span className="text-slate-700 font-semibold">Offer Letter PDF</span>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setOfferLetterFile(e.target.files?.[0] || null)}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-50 file:text-amber-700 file:font-semibold file:px-3 file:py-1"
+            />
+          </label>
+          {offerLetterFile && (
+            <p className="text-slate-500 text-xs">Selected: {offerLetterFile.name} ({(offerLetterFile.size / 1024).toFixed(1)} KB)</p>
+          )}
+        </div>
+      </Modal>
+
+      {/* ── Contract Modal ──────────────────────────────────────────── */}
+      <Modal
+        isOpen={contractModalOpen}
+        onClose={() => { setContractModalOpen(false); setContractFile(null); }}
+        title="Send Contract"
+        footer={(
+          <>
+            <button onClick={() => { setContractModalOpen(false); setContractFile(null); }} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
             <button
               onClick={handleSendAcceptanceContract}
-              disabled={contractSending || !contractForm.adminName || !contractForm.adminTitle || !contractForm.adminDate}
+              disabled={
+                contractSending ||
+                (contractType === "generated" && (!contractForm.adminName || !contractForm.adminTitle || !contractForm.adminDate)) ||
+                (contractType === "manual" && !contractFile)
+              }
               className="px-5 py-2 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50"
             >
               {contractSending ? "Sending..." : "Send Contract"}
@@ -491,38 +606,73 @@ function ApplicantsSection() {
       >
         <div className="space-y-4 text-sm">
           <p className="text-slate-600">
-            This sends an internal Digital Geeks acceptance letter to {selected?.firstName} {selected?.lastName} for online signing.
+            Send a contract to <strong>{selected?.firstName} {selected?.lastName}</strong>.
           </p>
 
-          <label className="block">
-            <span className="text-slate-700 font-semibold">Admin Full Name</span>
-            <input
-              value={contractForm.adminName}
-              onChange={(e) => setContractForm(prev => ({ ...prev, adminName: e.target.value }))}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
-              placeholder="e.g. Tawanda Moyo"
-            />
-          </label>
+          {/* Toggle */}
+          <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+            <button
+              onClick={() => setContractType("generated")}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${contractType === "generated" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+              System Generated
+            </button>
+            <button
+              onClick={() => setContractType("manual")}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${contractType === "manual" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+              Attach PDF
+            </button>
+          </div>
 
-          <label className="block">
-            <span className="text-slate-700 font-semibold">Admin Title</span>
-            <input
-              value={contractForm.adminTitle}
-              onChange={(e) => setContractForm(prev => ({ ...prev, adminTitle: e.target.value }))}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
-              placeholder="e.g. Head of People"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-slate-700 font-semibold">Contract Date</span>
-            <input
-              type="date"
-              value={contractForm.adminDate}
-              onChange={(e) => setContractForm(prev => ({ ...prev, adminDate: e.target.value }))}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
-            />
-          </label>
+          {contractType === "generated" ? (
+            <>
+              <p className="text-slate-500 text-xs">The system will generate a digital acceptance letter that the candidate can sign online.</p>
+              <label className="block">
+                <span className="text-slate-700 font-semibold">Admin Full Name</span>
+                <input
+                  value={contractForm.adminName}
+                  onChange={(e) => setContractForm(prev => ({ ...prev, adminName: e.target.value }))}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
+                  placeholder="e.g. Tawanda Moyo"
+                />
+              </label>
+              <label className="block">
+                <span className="text-slate-700 font-semibold">Admin Title</span>
+                <input
+                  value={contractForm.adminTitle}
+                  onChange={(e) => setContractForm(prev => ({ ...prev, adminTitle: e.target.value }))}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
+                  placeholder="e.g. Head of People"
+                />
+              </label>
+              <label className="block">
+                <span className="text-slate-700 font-semibold">Contract Date</span>
+                <input
+                  type="date"
+                  value={contractForm.adminDate}
+                  onChange={(e) => setContractForm(prev => ({ ...prev, adminDate: e.target.value }))}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2"
+                />
+              </label>
+            </>
+          ) : (
+            <>
+              <p className="text-slate-500 text-xs">Upload a PDF contract to send directly as an email attachment.</p>
+              <label className="block">
+                <span className="text-slate-700 font-semibold">Contract PDF</span>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setContractFile(e.target.files?.[0] || null)}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:text-slate-700 file:font-semibold file:px-3 file:py-1"
+                />
+              </label>
+              {contractFile && (
+                <p className="text-slate-500 text-xs">Selected: {contractFile.name} ({(contractFile.size / 1024).toFixed(1)} KB)</p>
+              )}
+            </>
+          )}
         </div>
       </Modal>
     </div>
