@@ -11,7 +11,7 @@ import {
   FiSearch, FiFilter, FiChevronRight, FiChevronLeft,
   FiMoreVertical, FiEdit2, FiTrash2, FiExternalLink,
   FiCheckCircle, FiXCircle, FiClock, FiSettings, FiLogOut,
-  FiCalendar,
+  FiCalendar, FiStar,
   FiRefreshCw,
 } from "react-icons/fi";
 
@@ -91,6 +91,7 @@ function DashboardOverview({ stats, setActiveTab }) {
     { label: "Total Applications", value: stats.applicants, icon: FiUsers, color: "text-blue-600", bg: "bg-blue-50" },
     { label: "Contact Inquiries", value: stats.contacts, icon: FiMail, color: "text-violet-600", bg: "bg-violet-50" },
     { label: "Pending Review", value: stats.pendingReview, icon: FiClock, color: "text-amber-600", bg: "bg-amber-50" },
+    { label: "ZimSensei Pilot Apps", value: stats.pilotTotal, icon: FiStar, color: "text-emerald-600", bg: "bg-emerald-50" },
   ];
 
   return (
@@ -99,7 +100,7 @@ function DashboardOverview({ stats, setActiveTab }) {
         title="Dashboard Overview" 
         description="A summary of your current recruitment and outreach activities."
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {cards.map((card, i) => (
           <motion.div
             key={card.label}
@@ -138,6 +139,15 @@ function DashboardOverview({ stats, setActiveTab }) {
                 <FiUsers className="text-blue-600" />
               </div>
               <span className="text-xs font-semibold text-slate-700">Review Applicants</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab("zimsensei")}
+              className="flex flex-col items-center justify-center p-4 border border-slate-100 rounded-xl hover:bg-emerald-50 hover:border-emerald-100 transition-colors group"
+            >
+              <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center mb-2 group-hover:bg-white">
+                <FiStar className="text-emerald-600" />
+              </div>
+              <span className="text-xs font-semibold text-slate-700">ZimSensei Pilot</span>
             </button>
           </div>
         </div>
@@ -1265,6 +1275,297 @@ function InterviewSlotsSection() {
   );
 }
 
+// ─── ZimSensei Pilot Management ─────────────────────────────────────────────
+const PILOT_STATUSES = ["Pending", "Reviewed", "Selected", "Waitlisted", "Rejected"];
+const PILOT_STATUS_STYLES = {
+  Pending:    "bg-amber-50   text-amber-700   border-amber-200",
+  Reviewed:   "bg-blue-50    text-blue-700    border-blue-200",
+  Selected:   "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Waitlisted: "bg-orange-50  text-orange-700  border-orange-200",
+  Rejected:   "bg-red-50     text-red-700     border-red-200",
+};
+
+function ZimsenseiPilotSection() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [boardFilter, setBoardFilter] = useState("all");
+  const [adminNotes, setAdminNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (boardFilter !== "all") params.set("examBoard", boardFilter);
+    try {
+      const res = await fetch(`/api/admin/zimsensei-pilot?${params}`);
+      const data = await res.json();
+      setItems(data.applications || []);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  }, [search, statusFilter, boardFilter]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await fetch("/api/admin/zimsensei-pilot", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+      fetchData();
+      if (selected?._id === id) setSelected(prev => ({ ...prev, status }));
+    } catch (e) { console.error(e); }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selected) return;
+    setSavingNotes(true);
+    try {
+      await fetch("/api/admin/zimsensei-pilot", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selected._id, adminNotes }),
+      });
+      setSelected(prev => ({ ...prev, adminNotes }));
+      fetchData();
+    } catch (e) { console.error(e); }
+    setSavingNotes(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this application?")) return;
+    try {
+      await fetch(`/api/admin/zimsensei-pilot?id=${id}`, { method: "DELETE" });
+      fetchData();
+      if (selected?._id === id) setSelected(null);
+    } catch (e) { console.error(e); }
+  };
+
+  const summaryStats = {
+    total: items.length,
+    selected: items.filter(i => i.status === "Selected").length,
+    pending: items.filter(i => i.status === "Pending").length,
+    zimsec: items.filter(i => i.examBoard === "ZIMSEC").length,
+    cambridge: items.filter(i => i.examBoard === "Cambridge").length,
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        title="ZimSensei Pilot Applications"
+        description="Review and select top students for the ZimSensei beta program."
+      />
+
+      {/* Quick Stats Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        {[
+          { label: "Total", value: summaryStats.total, color: "bg-slate-50 text-slate-900" },
+          { label: "Pending", value: summaryStats.pending, color: "bg-amber-50 text-amber-700" },
+          { label: "Selected", value: summaryStats.selected, color: "bg-emerald-50 text-emerald-700" },
+          { label: "ZIMSEC", value: summaryStats.zimsec, color: "bg-blue-50 text-blue-700" },
+          { label: "Cambridge", value: summaryStats.cambridge, color: "bg-indigo-50 text-indigo-700" },
+        ].map(s => (
+          <div key={s.label} className={`${s.color} rounded-2xl p-4 text-center border border-slate-100`}>
+            <p className="text-2xl font-extrabold">{s.value}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider opacity-70 mt-1">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+        <div className="relative flex-1">
+          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by name, email or school..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20 transition-all"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <FiFilter className="text-slate-400" />
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="bg-slate-50 border-none rounded-xl text-sm py-2 px-3 focus:ring-2 ring-indigo-500/20 transition-all"
+          >
+            <option value="all">All Statuses</option>
+            {PILOT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select
+            value={boardFilter}
+            onChange={e => setBoardFilter(e.target.value)}
+            className="bg-slate-50 border-none rounded-xl text-sm py-2 px-3 focus:ring-2 ring-indigo-500/20 transition-all"
+          >
+            <option value="all">All Boards</option>
+            <option value="ZIMSEC">ZIMSEC</option>
+            <option value="Cambridge">Cambridge</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="px-6 py-4 font-bold text-slate-600">Student</th>
+              <th className="px-6 py-4 font-bold text-slate-600">School</th>
+              <th className="px-6 py-4 font-bold text-slate-600">Level / Board</th>
+              <th className="px-6 py-4 font-bold text-slate-600">Status</th>
+              <th className="px-6 py-4 font-bold text-slate-600">Applied</th>
+              <th className="px-6 py-4 text-right font-bold text-slate-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {loading ? (
+              [1,2,3].map(i => <tr key={i} className="animate-pulse"><td colSpan="6" className="px-6 py-8"><div className="h-4 bg-slate-100 rounded w-full"></div></td></tr>)
+            ) : items.length === 0 ? (
+              <tr><td colSpan="6" className="px-6 py-20 text-center text-slate-400">No pilot applications found</td></tr>
+            ) : items.map((app) => (
+              <tr key={app._id} className="hover:bg-slate-50/50 transition-colors group">
+                <td className="px-6 py-4">
+                  <div className="font-bold text-slate-900">{app.name}</div>
+                  <div className="text-slate-500 text-xs">{app.email}</div>
+                </td>
+                <td className="px-6 py-4 text-slate-700 font-medium">{app.school}</td>
+                <td className="px-6 py-4">
+                  <span className="text-slate-700 font-medium">{app.qualifications}</span>
+                  <span className="text-slate-400 mx-1">·</span>
+                  <span className="text-slate-500 text-xs">{app.examBoard}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <Badge className={PILOT_STATUS_STYLES[app.status]}>{app.status}</Badge>
+                </td>
+                <td className="px-6 py-4 text-slate-400 whitespace-nowrap">
+                  {new Date(app.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {app.status !== "Selected" && (
+                      <button
+                        onClick={() => handleUpdateStatus(app._id, "Selected")}
+                        title="Select for Pilot"
+                        className="p-2 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-lg transition-colors"
+                      >
+                        <FiStar size={16} />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setSelected(app); setAdminNotes(app.adminNotes || ""); }}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-indigo-600"
+                    >
+                      <FiChevronRight size={18} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Detail Modal */}
+      <Modal
+        isOpen={!!selected}
+        onClose={() => setSelected(null)}
+        title="Pilot Application Details"
+        footer={(
+          <>
+            <button onClick={() => setSelected(null)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Close</button>
+            <button onClick={() => handleDelete(selected?._id)} className="px-4 py-2 text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center gap-1"><FiTrash2 size={14} /> Delete</button>
+          </>
+        )}
+      >
+        {selected && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-lg">
+                {selected.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900">{selected.name}</h4>
+                <p className="text-slate-500 text-sm">{selected.school}</p>
+              </div>
+              <div className="ml-auto">
+                <Badge className={PILOT_STATUS_STYLES[selected.status]}>{selected.status}</Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
+                <p className="text-slate-400 text-xs uppercase mb-1">Email</p>
+                <p className="font-medium text-slate-900">{selected.email}</p>
+              </div>
+              <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
+                <p className="text-slate-400 text-xs uppercase mb-1">Phone</p>
+                <p className="font-medium text-slate-900">{selected.phone}</p>
+              </div>
+              <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
+                <p className="text-slate-400 text-xs uppercase mb-1">Qualifications</p>
+                <p className="font-medium text-slate-900">{selected.qualifications}</p>
+              </div>
+              <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
+                <p className="text-slate-400 text-xs uppercase mb-1">Exam Board</p>
+                <p className="font-medium text-slate-900">{selected.examBoard}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-slate-400 text-xs uppercase tracking-wider font-bold">Results / Target Grades</p>
+              <div className="p-4 bg-slate-50 rounded-2xl text-slate-700 text-sm leading-relaxed border border-slate-100">
+                {selected.results}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-slate-400 text-xs uppercase tracking-wider font-bold">Update Status</p>
+              <div className="flex flex-wrap gap-2">
+                {PILOT_STATUSES.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => handleUpdateStatus(selected._id, s)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${selected.status === s ? `border-indigo-600 bg-indigo-50 text-indigo-600` : `border-slate-200 hover:border-indigo-300 text-slate-500`}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-slate-400 text-xs uppercase tracking-wider font-bold">Admin Notes</p>
+              <textarea
+                value={adminNotes}
+                onChange={e => setAdminNotes(e.target.value)}
+                rows="3"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 ring-indigo-500/20 resize-none transition-all"
+                placeholder="Add private notes about this student..."
+              />
+              <button
+                onClick={handleSaveNotes}
+                disabled={savingNotes}
+                className="px-5 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50"
+              >
+                {savingNotes ? "Saving..." : "Save Notes"}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
+
 // ─── Main Sidebar Navigation ────────────────────────────────────────────────
 const NAV_ITEMS = [
   { id: "dashboard",  label: "Overview",        icon: FiGrid },
@@ -1272,6 +1573,7 @@ const NAV_ITEMS = [
   { id: "contacts",   label: "Contacts",        icon: FiMail },
   { id: "jobs",       label: "Jobs",            icon: FiBriefcase },
   { id: "slots",      label: "Interview Slots", icon: FiCalendar },
+  { id: "zimsensei",  label: "ZimSensei Pilot", icon: FiStar },
 ];
 
 export default function RevolutAdminPanel() {
@@ -1282,17 +1584,20 @@ export default function RevolutAdminPanel() {
   useEffect(() => {
     const fetchGlobalStats = async () => {
       try {
-        const [aRes, cRes, jRes] = await Promise.all([
+        const [aRes, cRes, jRes, zRes] = await Promise.all([
           fetch("/api/admin/applicants"),
           fetch("/api/admin/contacts"),
           fetch("/api/admin/jobs"),
+          fetch("/api/admin/zimsensei-pilot"),
         ]);
-        const [aJson, cJson, jJson] = await Promise.all([aRes.json(), cRes.json(), jRes.json()]);
+        const [aJson, cJson, jJson, zJson] = await Promise.all([aRes.json(), cRes.json(), jRes.json(), zRes.json()]);
         setStats({
           applicants: aJson.total || aJson.applications?.length || 0,
           contacts: cJson.total || cJson.contacts?.length || 0,
           jobs: jJson.jobs?.filter(j => j.active).length || 0,
-          pendingReview: aJson.applications?.filter(a => a.status === "Pending").length || 0
+          pendingReview: aJson.applications?.filter(a => a.status === "Pending").length || 0,
+          pilotTotal: zJson.total || zJson.applications?.length || 0,
+          pilotPending: zJson.applications?.filter(a => a.status === "Pending").length || 0,
         });
       } catch (err) { console.error(err); }
     };
@@ -1332,6 +1637,11 @@ export default function RevolutAdminPanel() {
                 {item.id === "applicants" && stats.pendingReview > 0 && isSidebarOpen && (
                   <span className="ml-auto bg-indigo-600 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center border-2 border-white">
                     {stats.pendingReview}
+                  </span>
+                )}
+                {item.id === "zimsensei" && stats.pilotPending > 0 && isSidebarOpen && (
+                  <span className="ml-auto bg-emerald-600 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center border-2 border-white">
+                    {stats.pilotPending}
                   </span>
                 )}
               </button>
@@ -1395,6 +1705,7 @@ export default function RevolutAdminPanel() {
               {activeTab === "contacts" && <ContactsSection />}
               {activeTab === "jobs" && <JobsSection />}
               {activeTab === "slots" && <InterviewSlotsSection />}
+              {activeTab === "zimsensei" && <ZimsenseiPilotSection />}
             </motion.div>
           </AnimatePresence>
         </div>
