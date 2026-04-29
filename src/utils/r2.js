@@ -1,12 +1,18 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
+// Helper to strip quotes from env variables if they exist
+const stripQuotes = (str) => {
+  if (!str) return str;
+  return str.replace(/^["']|["']$/g, '');
+};
+
 // Validate required environment variables
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME;
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL;
+const R2_ACCOUNT_ID = stripQuotes(process.env.R2_ACCOUNT_ID);
+const R2_ACCESS_KEY_ID = stripQuotes(process.env.R2_ACCESS_KEY_ID);
+const R2_SECRET_ACCESS_KEY = stripQuotes(process.env.R2_SECRET_ACCESS_KEY);
+const R2_BUCKET_NAME = stripQuotes(process.env.R2_BUCKET_NAME);
+const R2_PUBLIC_URL = stripQuotes(process.env.R2_PUBLIC_URL);
 
 let s3Client = null;
 
@@ -59,9 +65,14 @@ export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder 
       ? R2_PUBLIC_URL.slice(0, -1) 
       : R2_PUBLIC_URL;
     
-    return `${cleanBaseUrl}/${fileKey}`;
+    // Ensure the URL starts with https:// if it doesn't already
+    const protocolBaseUrl = cleanBaseUrl.startsWith('http') 
+      ? cleanBaseUrl 
+      : `https://${cleanBaseUrl}`;
+    
+    return `${protocolBaseUrl}/${fileKey}`;
   } catch (error) {
     console.error('Error uploading to R2:', error);
-    throw new Error('Failed to upload file to Cloudflare storage');
+    throw new Error(`Cloudflare R2 Error: ${error.message}`);
   }
 }

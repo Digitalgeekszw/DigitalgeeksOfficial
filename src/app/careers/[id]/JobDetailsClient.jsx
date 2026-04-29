@@ -46,7 +46,9 @@ export default function JobDetailsClient({ job }) {
         setFormStatus("success");
       } else {
         setFormStatus("error");
-        setErrorMessage(data.message || `Error ${response.status}: Unable to submit.`);
+        // Show the detailed error if available to help debugging
+        const displayError = data.error ? `${data.message} (${data.error})` : (data.message || `Error ${response.status}: Unable to submit.`);
+        setErrorMessage(displayError);
       }
     } catch (error) {
       console.error("Submission error:", error);

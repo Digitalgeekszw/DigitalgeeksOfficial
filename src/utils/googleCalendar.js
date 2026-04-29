@@ -1,10 +1,16 @@
 import { google } from 'googleapis';
 
+const stripQuotes = (str) => {
+  if (!str) return str;
+  return str.replace(/^["']|["']$/g, '');
+};
+
 function getAuth() {
+  const privateKey = stripQuotes(process.env.GOOGLE_PRIVATE_KEY);
   return new google.auth.GoogleAuth({
     credentials: {
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      client_email: stripQuotes(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL),
+      private_key: privateKey?.replace(/\\n/g, '\n'),
     },
     scopes: [
       'https://www.googleapis.com/auth/calendar',
@@ -17,8 +23,8 @@ function getAuth() {
  * Creates a Google Calendar event with a Google Meet link.
  */
 export async function createInterviewEvent({ startTime, endTime, applicantName, applicantEmail, jobTitle }) {
-  const calendarId = process.env.GOOGLE_CALENDAR_ID;
-  const meetLink = process.env.GOOGLE_MEET_ROOM_URL || null;
+  const calendarId = stripQuotes(process.env.GOOGLE_CALENDAR_ID);
+  const meetLink = stripQuotes(process.env.GOOGLE_MEET_ROOM_URL) || null;
 
   const calendar = google.calendar({ version: 'v3', auth: getAuth() });
 
@@ -70,9 +76,10 @@ export async function createInterviewEvent({ startTime, endTime, applicantName, 
  * Deletes a Google Calendar event by event ID.
  */
 export async function deleteInterviewEvent(googleEventId) {
+  const calendarId = stripQuotes(process.env.GOOGLE_CALENDAR_ID);
   const calendar = google.calendar({ version: 'v3', auth: getAuth() });
   await calendar.events.delete({
-    calendarId: process.env.GOOGLE_CALENDAR_ID,
+    calendarId,
     eventId: googleEventId,
     sendUpdates: 'all',
   });
