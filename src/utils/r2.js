@@ -37,11 +37,15 @@ if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
  * @returns {Promise<string>} The public URL of the uploaded file
  */
 export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder = 'resumes') {
+  console.log(`Starting R2 upload: ${originalFilename} (${mimeType}) to bucket: ${R2_BUCKET_NAME}`);
+  
   if (!s3Client) {
+    console.error('R2 Client not initialized. Check credentials.');
     throw new Error('R2 credentials are not configured in environment variables');
   }
 
   if (!R2_BUCKET_NAME || !R2_PUBLIC_URL) {
+    console.error('R2 Bucket Name or Public URL missing');
     throw new Error('R2_BUCKET_NAME or R2_PUBLIC_URL is missing in environment variables');
   }
 
@@ -51,6 +55,8 @@ export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder 
   const safeFilename = originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_');
   const fileKey = `${folder}/${uniqueId}-${safeFilename}`;
 
+  console.log(`Generated file key: ${fileKey}`);
+
   const command = new PutObjectCommand({
     Bucket: R2_BUCKET_NAME,
     Key: fileKey,
@@ -59,7 +65,10 @@ export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder 
   });
 
   try {
+    console.log('Sending PutObjectCommand to R2...');
     await s3Client.send(command);
+    console.log('R2 upload successful');
+
     // Remove trailing slash from public URL if present
     const cleanBaseUrl = R2_PUBLIC_URL.endsWith('/') 
       ? R2_PUBLIC_URL.slice(0, -1) 
@@ -70,9 +79,16 @@ export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder 
       ? cleanBaseUrl 
       : `https://${cleanBaseUrl}`;
     
-    return `${protocolBaseUrl}/${fileKey}`;
+    const finalUrl = `${protocolBaseUrl}/${fileKey}`;
+    console.log(`Public URL generated: ${finalUrl}`);
+    return finalUrl;
   } catch (error) {
-    console.error('Error uploading to R2:', error);
+    console.error('Detailed R2 Upload Error:', {
+      message: error.message,
+      code: error.code,
+      requestId: error.$metadata?.requestId,
+      bucket: R2_BUCKET_NAME
+    });
     throw new Error(`Cloudflare R2 Error: ${error.message}`);
   }
 }
