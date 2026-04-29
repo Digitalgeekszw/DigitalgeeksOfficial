@@ -12,10 +12,12 @@ export default function JobDetailsClient({ job }) {
   const router = useRouter();
   const [isApplying, setIsApplying] = useState(false);
   const [formStatus, setFormStatus] = useState("idle"); // idle, submitting, success, error
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormStatus("submitting");
+    setErrorMessage("");
     
     const formData = new FormData(e.target);
     formData.append("jobTitle", job.title);
@@ -27,13 +29,29 @@ export default function JobDetailsClient({ job }) {
         body: formData,
       });
 
+      let data = {};
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Non-JSON response received:", text);
+        if (response.status === 413) {
+          throw new Error("File too large. Please upload a CV smaller than 4MB.");
+        }
+        throw new Error("Server error. Please try again later.");
+      }
+
       if (response.ok) {
         setFormStatus("success");
       } else {
         setFormStatus("error");
+        setErrorMessage(data.message || `Error ${response.status}: Unable to submit.`);
       }
     } catch (error) {
+      console.error("Submission error:", error);
       setFormStatus("error");
+      setErrorMessage(error.message || "Unable to submit. Please check your connection and try again.");
     }
   };
 
@@ -191,7 +209,7 @@ export default function JobDetailsClient({ job }) {
 
                     {formStatus === "error" && (
                       <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-medium text-center">
-                        Unable to submit. Please check your connection and try again.
+                        {errorMessage}
                       </div>
                     )}
 
