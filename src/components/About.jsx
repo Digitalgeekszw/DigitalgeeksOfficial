@@ -4,6 +4,7 @@ import React from "react";
 import { features } from "../constants";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useContent } from "../hooks/useContent";
 
 const FeatureCard = ({ icon: Icon, title, content, index }) => (
   <motion.div
@@ -36,6 +37,9 @@ const FeatureCard = ({ icon: Icon, title, content, index }) => (
 );
 
 const About = () => {
+  const { content } = useContent();
+  const aboutTeamImage = content["about-team-image"] || "/images/about-team.png";
+
   const openPDF = () => {
     window.open("/About.pdf", "_blank");
   };
@@ -57,7 +61,7 @@ const About = () => {
           >
             <div className="relative w-full aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_-16px_rgba(0,0,0,0.14)] border border-slate-100">
               <Image
-                src="/images/about-team.png"
+                src={aboutTeamImage}
                 alt="DigitalGeeks team collaborating"
                 fill
                 className="object-cover"

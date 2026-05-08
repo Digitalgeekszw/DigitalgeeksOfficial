@@ -1566,6 +1566,194 @@ function ZimsenseiPilotSection() {
   );
 }
 
+// ─── Content Management ───────────────────────────────────────────────────
+function ContentSection() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [file, setFile] = useState(null);
+  const [formData, setFormData] = useState({
+    key: "", label: "", type: "image", value: ""
+  });
+  const [saving, setSaving] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/content");
+      const data = await res.json();
+      setItems(data.contents || []);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append("key", formData.key);
+      fd.append("label", formData.label);
+      fd.append("type", formData.type);
+      if (file) {
+        fd.append("file", file);
+      } else {
+        fd.append("value", formData.value);
+      }
+
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        body: fd,
+      });
+
+      if (res.ok) {
+        setIsModalOpen(false);
+        setEditingItem(null);
+        setFile(null);
+        setFormData({ key: "", label: "", type: "image", value: "" });
+        fetchData();
+      }
+    } catch (e) { console.error(e); }
+    setSaving(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this content?")) return;
+    try {
+      await fetch(`/api/admin/content?id=${id}`, { method: "DELETE" });
+      fetchData();
+    } catch (e) { console.error(e); }
+  };
+
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setFormData({
+      key: item.key,
+      label: item.label,
+      type: item.type,
+      value: item.value
+    });
+    setFile(null);
+    setIsModalOpen(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Website Content" 
+        description="Manage images and videos across the website."
+        actions={(
+          <button 
+            onClick={() => { setEditingItem(null); setFormData({ key: "", label: "", type: "image", value: "" }); setFile(null); setIsModalOpen(true); }}
+            className="px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20"
+          >
+            <FiPlus /> Add New Content
+          </button>
+        )}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          [1,2,3].map(i => <div key={i} className="h-64 bg-white border border-slate-200 rounded-2xl animate-pulse shadow-sm"></div>)
+        ) : items.length === 0 ? (
+          <div className="col-span-full py-20 text-center text-slate-400 bg-white border border-dotted border-slate-200 rounded-2xl">No content added yet</div>
+        ) : items.map((item) => (
+          <motion.div
+            key={item._id}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col"
+          >
+            <div className="aspect-video bg-slate-100 relative overflow-hidden">
+              {item.type === "video" ? (
+                <video src={item.value} className="w-full h-full object-cover" muted loop onMouseOver={e => e.target.play()} onMouseOut={e => e.target.pause()} />
+              ) : (
+                <img src={item.value} alt={item.label} className="w-full h-full object-cover" />
+              )}
+              <div className="absolute top-2 right-2 flex gap-2">
+                <button onClick={() => handleEdit(item)} className="p-2 bg-white/90 backdrop-blur shadow-sm rounded-lg text-slate-600 hover:text-indigo-600 transition-colors">
+                  <FiEdit2 size={16} />
+                </button>
+                <button onClick={() => handleDelete(item._id)} className="p-2 bg-white/90 backdrop-blur shadow-sm rounded-lg text-slate-600 hover:text-red-600 transition-colors">
+                  <FiTrash2 size={16} />
+                </button>
+              </div>
+              <div className="absolute bottom-2 left-2">
+                <Badge className="bg-white/90 backdrop-blur shadow-sm border-none">{item.type}</Badge>
+              </div>
+            </div>
+            <div className="p-4 flex-1">
+              <h4 className="font-bold text-slate-900">{item.label}</h4>
+              <p className="text-slate-400 text-xs font-mono mt-1">Key: {item.key}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingItem ? "Edit Content" : "Add New Content"}
+        footer={(
+          <>
+            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+            <button onClick={handleSubmit} disabled={saving} className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20 disabled:opacity-50">
+              {saving ? "Saving..." : editingItem ? "Save Changes" : "Add Content"}
+            </button>
+          </>
+        )}
+      >
+        <form className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-400 uppercase">Label (Display Name)</label>
+            <input 
+              value={formData.label} onChange={e => setFormData({...formData, label: e.target.value})}
+              placeholder="Hero Banner Video" className="w-full px-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-400 uppercase">Unique Key (Used in code)</label>
+            <input 
+              value={formData.key} onChange={e => setFormData({...formData, key: e.target.value})}
+              placeholder="hero-video" className="w-full px-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20"
+              disabled={!!editingItem}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-400 uppercase">Type</label>
+            <select 
+              value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}
+              className="w-full px-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20"
+            >
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-400 uppercase">Upload File</label>
+            <input 
+              type="file"
+              accept={formData.type === "video" ? "video/*" : "image/*"}
+              onChange={e => setFile(e.target.files[0])}
+              className="w-full px-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-400 uppercase">Or URL</label>
+            <input 
+              value={formData.value} onChange={e => setFormData({...formData, value: e.target.value})}
+              placeholder="https://..." className="w-full px-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20"
+            />
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+}
+
 // ─── Main Sidebar Navigation ────────────────────────────────────────────────
 const NAV_ITEMS = [
   { id: "dashboard",  label: "Overview",        icon: FiGrid },
@@ -1574,6 +1762,7 @@ const NAV_ITEMS = [
   { id: "jobs",       label: "Jobs",            icon: FiBriefcase },
   { id: "slots",      label: "Interview Slots", icon: FiCalendar },
   { id: "zimsensei",  label: "ZimSensei Pilot", icon: FiStar },
+  { id: "content",    label: "Content",         icon: FiSettings },
 ];
 
 export default function RevolutAdminPanel() {
@@ -1706,6 +1895,7 @@ export default function RevolutAdminPanel() {
               {activeTab === "jobs" && <JobsSection />}
               {activeTab === "slots" && <InterviewSlotsSection />}
               {activeTab === "zimsensei" && <ZimsenseiPilotSection />}
+              {activeTab === "content" && <ContentSection />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -1713,3 +1903,4 @@ export default function RevolutAdminPanel() {
     </div>
   );
 }
+

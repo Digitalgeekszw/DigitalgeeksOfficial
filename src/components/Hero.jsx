@@ -4,8 +4,12 @@ import React from "react";
 import styles from "../style";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useContent } from "../hooks/useContent";
 
 const Hero = () => {
+  const { content } = useContent();
+  const heroVideo = content["hero-video"] || "https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev/videos/output1.mp4";
+
   return (
     <section
       id="home"
@@ -82,6 +86,7 @@ const Hero = () => {
           <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 to-blue-400/20 rounded-[32px] blur-2xl opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
           
           <video 
+            key={heroVideo}
             className="w-full rounded-[24px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] object-cover aspect-video border border-slate-200/60 relative z-10"
             autoPlay 
             loop 
@@ -89,7 +94,7 @@ const Hero = () => {
             playsInline
             controls
           >
-            <source src="https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev/videos/output1.mp4" type="video/mp4" />
+            <source src={heroVideo} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

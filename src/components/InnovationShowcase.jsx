@@ -4,23 +4,28 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { innovationShowcase } from "../constants";
+import { useContent } from "../hooks/useContent";
 
-const ShowcaseCard = ({ title, category, image, link, index }) => (
-  <Link href={link} target="_blank" rel="noopener noreferrer">
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.15 }}
-      className="group relative overflow-hidden rounded-2xl cursor-pointer"
-    >
-      <div className="relative w-full h-[300px] sm:h-[400px]">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
-        />
+const ShowcaseCard = ({ title, category, image, link, index, id }) => {
+  const { content } = useContent();
+  const dynamicImage = content[`showcase-${id}-image`] || image;
+
+  return (
+    <Link href={link} target="_blank" rel="noopener noreferrer">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: index * 0.15 }}
+        className="group relative overflow-hidden rounded-2xl cursor-pointer"
+      >
+        <div className="relative w-full h-[300px] sm:h-[400px]">
+          <Image
+            src={dynamicImage}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
       </div>
