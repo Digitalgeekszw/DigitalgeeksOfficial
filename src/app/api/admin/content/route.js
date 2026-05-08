@@ -5,6 +5,14 @@ import { uploadToR2 } from "../../../../utils/r2";
 
 export const dynamic = "force-dynamic";
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};
+
 export async function GET(req) {
   try {
     await connectDB();
