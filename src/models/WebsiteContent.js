@@ -13,7 +13,7 @@ const WebsiteContentSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['image', 'video', 'text'],
+    enum: ['image', 'video', 'text', 'pdf'],
     default: 'image',
   },
   label: {

@@ -1573,6 +1573,9 @@ const CONTENT_POSITIONS = [
   { key: "about-team-image", label: "About Page: Team Photo", type: "image" },
   { key: "showcase-showcase-1-image", label: "Innovation: Preciagro", type: "image" },
   { key: "showcase-showcase-2-image", label: "Innovation: Sanaganai", type: "image" },
+  // Example PDF slots (you can add more as needed)
+  { key: "brochure-pdf", label: "Marketing: Company Brochure (PDF)", type: "pdf" },
+  { key: "profile-pdf", label: "Marketing: Company Profile (PDF)", type: "pdf" },
 ];
 
 function ContentSection() {
@@ -1622,16 +1625,17 @@ function ContentSection() {
       let finalValue = formData.value;
 
       if (file) {
-        // 1. Get presigned URL
-        const presignedRes = await fetch("/api/admin/content", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileName: file.name,
-            fileType: file.type,
-            folder: formData.type === "video" ? "videos" : "images"
-          }),
-        });
+        // 1. Get presigned URL via GET (to bypass all POST body limits)
+        const folder =
+          formData.type === "video"
+            ? "videos"
+            : formData.type === "pdf"
+            ? "pdfs"
+            : "images";
+        const presignedRes = await fetch(
+          `/api/admin/content?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}&folder=${folder}`,
+          { cache: "no-store" }
+        );
 
         if (!presignedRes.ok) throw new Error("Failed to get upload URL");
         const { uploadUrl, publicUrl } = await presignedRes.json();
@@ -1649,16 +1653,16 @@ function ContentSection() {
 
       if (!finalValue) throw new Error("No file or URL provided");
 
-      // 3. Save reference in DB
-      const fd = new FormData();
-      fd.append("key", formData.key);
-      fd.append("label", formData.label);
-      fd.append("type", formData.type);
-      fd.append("value", finalValue);
-
+      // 3. Save reference in DB using JSON
       const res = await fetch("/api/admin/content", {
         method: "POST",
-        body: fd,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: formData.key,
+          label: formData.label,
+          type: formData.type,
+          value: finalValue,
+        }),
       });
 
       if (res.ok) {
@@ -1698,8 +1702,8 @@ function ContentSection() {
   return (
     <div className="space-y-6">
       <SectionHeader 
-        title="Website Content" 
-        description="Manage images and videos across the website."
+        title="Website Content (Direct-to-Cloud)" 
+        description="Manage images and videos across the website. Files are uploaded directly to cloud storage to support large videos."
         actions={(
           <button 
             onClick={() => { setEditingItem(null); setFormData({ key: "", label: "", type: "image", value: "" }); setFile(null); setIsModalOpen(true); }}
@@ -1724,7 +1728,29 @@ function ContentSection() {
           >
             <div className="aspect-video bg-slate-100 relative overflow-hidden">
               {item.type === "video" ? (
-                <video src={item.value} className="w-full h-full object-cover" muted loop onMouseOver={e => e.target.play()} onMouseOut={e => e.target.pause()} />
+                <video
+                  src={item.value}
+                  className="w-full h-full object-cover"
+                  muted
+                  loop
+                  onMouseOver={e => e.target.play()}
+                  onMouseOut={e => e.target.pause()}
+                />
+              ) : item.type === "pdf" ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2 px-4 text-center">
+                  <span className="text-4xl">📄</span>
+                  <p className="text-xs font-semibold text-slate-700 line-clamp-2">
+                    {item.label || "PDF Document"}
+                  </p>
+                  <a
+                    href={item.value}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] font-bold text-indigo-600 underline"
+                  >
+                    Open PDF
+                  </a>
+                </div>
               ) : (
                 <img src={item.value} alt={item.label} className="w-full h-full object-cover" />
               )}
@@ -1800,13 +1826,20 @@ function ContentSection() {
             >
               <option value="image">Image</option>
               <option value="video">Video</option>
+              <option value="pdf">PDF</option>
             </select>
           </div>
           <div className="space-y-1">
             <label className="text-xs font-bold text-slate-400 uppercase">Upload File</label>
             <input 
               type="file"
-              accept={formData.type === "video" ? "video/*" : "image/*"}
+              accept={
+                formData.type === "video"
+                  ? "video/*"
+                  : formData.type === "pdf"
+                  ? "application/pdf"
+                  : "image/*"
+              }
               onChange={e => setFile(e.target.files[0])}
               className="w-full px-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
             />

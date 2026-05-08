@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, PutBucketCorsCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,6 +16,7 @@ const R2_BUCKET_NAME = stripQuotes(process.env.R2_BUCKET_NAME);
 const R2_PUBLIC_URL = stripQuotes(process.env.R2_PUBLIC_URL);
 
 let s3Client = null;
+let corsConfigured = false;
 
 if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
   s3Client = new S3Client({
@@ -28,6 +29,32 @@ if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
   });
 } else {
   console.warn('R2 credentials missing in environment variables');
+}
+
+export async function configureR2CORS() {
+  if (corsConfigured || !s3Client || !R2_BUCKET_NAME) return;
+  try {
+    await s3Client.send(new PutBucketCorsCommand({
+      Bucket: R2_BUCKET_NAME,
+      CORSConfiguration: {
+        CORSRules: [{
+          AllowedHeaders: ['*'],
+          AllowedMethods: ['GET', 'PUT', 'POST', 'HEAD'],
+          AllowedOrigins: [
+            'https://www.digitalgeeks.tech',
+            'https://digitalgeeks.tech',
+            'http://localhost:3000',
+          ],
+          ExposeHeaders: ['ETag'],
+          MaxAgeSeconds: 86400,
+        }],
+      },
+    }));
+    corsConfigured = true;
+    console.log('R2 CORS configured successfully');
+  } catch (error) {
+    console.warn('R2 CORS setup failed (may need Cloudflare dashboard):', error.message);
+  }
 }
 
 /**
@@ -103,6 +130,7 @@ export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder 
  */
 export async function generatePresignedUrl(fileName, fileType, folder = 'content') {
   if (!s3Client) throw new Error('R2 Client not initialized');
+  await configureR2CORS();
 
   const uniqueId = uuidv4();
   const safeFilename = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
