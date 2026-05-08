@@ -17,6 +17,8 @@ const R2_PUBLIC_URL = stripQuotes(process.env.R2_PUBLIC_URL);
 
 let s3Client = null;
 let corsConfigured = false;
+/** After one failed PutBucketCors per process, skip retries (credentials often lack permission; use Dashboard). */
+let corsConfigureSkipped = false;
 
 if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
   s3Client = new S3Client({
@@ -26,20 +28,22 @@ if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
       accessKeyId: R2_ACCESS_KEY_ID,
       secretAccessKey: R2_SECRET_ACCESS_KEY,
     },
+    // Avoid default CRC32 on presigned PutObject URLs (fewer query params / simpler browser CORS preflight).
+    requestChecksumCalculation: 'WHEN_REQUIRED',
   });
 } else {
   console.warn('R2 credentials missing in environment variables');
 }
 
 export async function configureR2CORS() {
-  if (corsConfigured || !s3Client || !R2_BUCKET_NAME) return;
+  if (corsConfigured || corsConfigureSkipped || !s3Client || !R2_BUCKET_NAME) return;
   try {
     await s3Client.send(new PutBucketCorsCommand({
       Bucket: R2_BUCKET_NAME,
       CORSConfiguration: {
         CORSRules: [{
           AllowedHeaders: ['*'],
-          AllowedMethods: ['GET', 'PUT', 'POST', 'HEAD'],
+          AllowedMethods: ['GET', 'PUT', 'POST', 'HEAD', 'DELETE'],
           AllowedOrigins: [
             'https://www.digitalgeeks.tech',
             'https://digitalgeeks.tech',
@@ -51,9 +55,15 @@ export async function configureR2CORS() {
       },
     }));
     corsConfigured = true;
-    console.log('R2 CORS configured successfully');
+    console.log('R2 CORS configured successfully via API');
   } catch (error) {
-    console.warn('R2 CORS setup failed (may need Cloudflare dashboard):', error.message);
+    corsConfigureSkipped = true;
+    console.error(
+      '[R2] PutBucketCors failed; browser uploads need a CORS policy on the bucket. ' +
+        'Add one in Cloudflare: R2 → your bucket → Settings → CORS policy. ' +
+        'See https://developers.cloudflare.com/r2/buckets/cors/',
+      error.message
+    );
   }
 }
 
