@@ -16,6 +16,7 @@ export default function ServicesPage() {
       <PageHero 
         title="Our Services" 
         subtitle="Comprehensive digital solutions designed to accelerate your business growth and transform your vision into reality." 
+        cmsImageKey="services-hero-image"
       />
 
       <div className={`bg-primary ${styles.paddingX} ${styles.flexCenter}`}>

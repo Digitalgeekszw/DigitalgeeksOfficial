@@ -17,6 +17,7 @@ export default function CommunityPage() {
         title="Community & Culture" 
         subtitle="Join our dynamic community of creators, builders, and visionaries shaping the future of technology." 
         imageSrc="/images/post.png"
+        cmsImageKey="community-hero-image"
       />
 
       <div className={`bg-primary w-full`}>

@@ -3,8 +3,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useContent } from '../hooks/useContent';
 
-const PageHero = ({ title, subtitle, badge = "DigitalGeeks", imageSrc = "/images/about-hero-visual.png" }) => {
+const PageHero = ({ title, subtitle, badge = "DigitalGeeks", imageSrc = "/images/about-hero-visual.png", cmsImageKey }) => {
+  const { content } = useContent();
+  const resolvedSrc = (cmsImageKey && content[cmsImageKey]) || imageSrc;
+
   return (
     <section className="relative w-full overflow-hidden bg-white pt-[120px] pb-[80px] sm:pt-[160px] sm:pb-[100px]">
 
@@ -83,7 +87,7 @@ const PageHero = ({ title, subtitle, badge = "DigitalGeeks", imageSrc = "/images
         >
           <div className="relative w-full aspect-square max-w-[480px] rounded-[2.5rem] overflow-hidden shadow-[0_32px_80px_-12px_rgba(37,99,235,0.2)] border border-slate-100">
             <Image
-              src={imageSrc}
+              src={resolvedSrc}
               alt={title || "Digital Innovation Network"}
               fill
               className="object-cover"

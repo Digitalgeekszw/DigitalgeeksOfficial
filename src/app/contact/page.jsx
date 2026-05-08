@@ -16,6 +16,7 @@ export default function ContactPage() {
       <PageHero 
         title="Contact Us" 
         subtitle="Have a project in mind or just want to say hi? We'd love to hear from you." 
+        cmsImageKey="contact-hero-image"
       />
 
       <div className={`bg-white text-black`}>

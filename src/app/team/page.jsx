@@ -17,6 +17,7 @@ export default function TeamPage() {
         title="Our Leadership Team" 
         subtitle="Meet the passionate minds leading DigitalGeeks towards continuous innovation and success." 
         imageSrc="/images/about-team.png"
+        cmsImageKey="team-hero-image"
       />
 
       <div className={`bg-primary ${styles.paddingX} ${styles.flexCenter}`}>

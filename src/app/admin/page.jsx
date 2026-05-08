@@ -64,17 +64,17 @@ function Modal({ isOpen, onClose, title, children, footer }) {
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
+          className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col min-h-0"
         >
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
             <h3 className="font-bold text-slate-900">{title}</h3>
             <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-lg text-slate-400">✕</button>
           </div>
-          <div className="p-6 overflow-y-auto flex-1">
+          <div className="p-6 overflow-y-auto flex-1 min-h-0">
             {children}
           </div>
           {footer && (
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 shrink-0">
               {footer}
             </div>
           )}
@@ -1570,10 +1570,14 @@ function ZimsenseiPilotSection() {
 const CONTENT_POSITIONS = [
   { key: "hero-video", label: "Home: Hero Video", type: "video" },
   { key: "about-hero-image", label: "About Page: Hero Banner", type: "image" },
-  { key: "about-team-image", label: "About Page: Team Photo", type: "image" },
-  { key: "showcase-showcase-1-image", label: "Innovation: Preciagro", type: "image" },
-  { key: "showcase-showcase-2-image", label: "Innovation: Sanaganai", type: "image" },
-  // Example PDF slots (you can add more as needed)
+  { key: "about-team-image", label: "Home — About section: Team Photo", type: "image" },
+  { key: "showcase-showcase-1-image", label: "Home — Innovation: Preciagro card", type: "image" },
+  { key: "showcase-showcase-2-image", label: "Home — Innovation: Sanaganai card", type: "image" },
+  { key: "community-hero-image", label: "Community page: Hero image", type: "image" },
+  { key: "community-culture-video", label: "Community page: Culture section video", type: "video" },
+  { key: "team-hero-image", label: "Team page: Hero image", type: "image" },
+  { key: "contact-hero-image", label: "Contact page: Hero image", type: "image" },
+  { key: "services-hero-image", label: "Services page: Hero image", type: "image" },
   { key: "brochure-pdf", label: "Marketing: Company Brochure (PDF)", type: "pdf" },
   { key: "profile-pdf", label: "Marketing: Company Profile (PDF)", type: "pdf" },
 ];
@@ -1703,7 +1707,7 @@ function ContentSection() {
     <div className="space-y-6">
       <SectionHeader 
         title="Website Content (Direct-to-Cloud)" 
-        description="Manage images and videos across the website. Files are uploaded directly to cloud storage to support large videos."
+        description="This grid lists only items saved in the database. Built-in fallbacks still show on the site until you add content for each position. Use “Website Position” to pick a slot, or “Other / Custom Key” for a new key."
         actions={(
           <button 
             onClick={() => { setEditingItem(null); setFormData({ key: "", label: "", type: "image", value: "" }); setFile(null); setIsModalOpen(true); }}
@@ -1906,15 +1910,15 @@ export default function RevolutAdminPanel() {
 
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 bg-white border-r border-slate-200 z-50 transition-all duration-300 ease-in-out ${isSidebarOpen ? "w-64" : "w-20"}`}>
-        <div className="h-full flex flex-col">
+        <div className="h-full min-h-0 flex flex-col">
           {/* Logo Section */}
-          <div className="p-6 flex items-center gap-3">
+          <div className="p-6 flex items-center gap-3 shrink-0">
             <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white font-black text-xs shrink-0">DG</div>
             {isSidebarOpen && <span className="font-extrabold text-sm tracking-tight text-slate-900">DigitalGeeks Hub</span>}
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 space-y-1">
+          {/* Navigation — scroll when viewport is short so all items stay reachable */}
+          <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 space-y-1 pb-2">
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
@@ -1942,7 +1946,7 @@ export default function RevolutAdminPanel() {
           </nav>
 
           {/* Bottom Actions */}
-          <div className="p-3 border-t border-slate-100 space-y-1">
+          <div className="p-3 border-t border-slate-100 space-y-1 shrink-0 bg-white">
             <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 transition-colors group">
               <FiSettings className="w-5 h-5 text-slate-400 group-hover:text-slate-900" />
               {isSidebarOpen && <span className="text-sm font-semibold">Settings</span>}

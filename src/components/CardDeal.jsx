@@ -2,8 +2,15 @@
 
 import React from "react";
 import styles, { layout } from "../style";
+import { useContent } from "../hooks/useContent";
+
+const COMMUNITY_VIDEO_FALLBACK =
+  "https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev/videos/output2.mp4";
 
 const CardDeal = () => {
+  const { content } = useContent();
+  const videoSrc = content["community-culture-video"] || COMMUNITY_VIDEO_FALLBACK;
+
   return (
     <section id="Community" className={layout.section}>
       <div className={layout.sectionInfo}>
@@ -26,7 +33,8 @@ const CardDeal = () => {
       <div className={layout.sectionImg}>
         <div className="w-full h-full rounded-[20px] overflow-hidden shadow-2xl border border-[#dadce0]">
            <video 
-              src="https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev/videos/output2.mp4"
+              key={videoSrc}
+              src={videoSrc}
               className="w-full h-full object-cover"
               autoPlay
               loop
