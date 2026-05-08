@@ -1589,7 +1589,7 @@ function ContentSection() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/content");
+      const res = await fetch("/api/admin/content", { cache: "no-store" });
       const data = await res.json();
       setItems(data.contents || []);
     } catch (e) { console.error(e); }

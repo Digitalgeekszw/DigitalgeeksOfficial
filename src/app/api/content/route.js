@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
 import WebsiteContent from "../../../models/WebsiteContent";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req) {
   try {
     await connectDB();

@@ -3,6 +3,8 @@ import connectDB from "../../../../lib/mongodb";
 import WebsiteContent from "../../../../models/WebsiteContent";
 import { uploadToR2 } from "../../../../utils/r2";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req) {
   try {
     await connectDB();
