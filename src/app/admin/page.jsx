@@ -1567,6 +1567,14 @@ function ZimsenseiPilotSection() {
 }
 
 // ─── Content Management ───────────────────────────────────────────────────
+const CONTENT_POSITIONS = [
+  { key: "hero-video", label: "Home: Hero Video", type: "video" },
+  { key: "about-hero-image", label: "About Page: Hero Banner", type: "image" },
+  { key: "about-team-image", label: "About Page: Team Photo", type: "image" },
+  { key: "showcase-showcase-1-image", label: "Innovation: Preciagro", type: "image" },
+  { key: "showcase-showcase-2-image", label: "Innovation: Sanaganai", type: "image" },
+];
+
 function ContentSection() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1589,6 +1597,23 @@ function ContentSection() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handlePositionChange = (e) => {
+    const selectedKey = e.target.value;
+    if (selectedKey === "custom") {
+      setFormData({ ...formData, key: "", label: "", type: "image" });
+      return;
+    }
+    const pos = CONTENT_POSITIONS.find(p => p.key === selectedKey);
+    if (pos) {
+      setFormData({
+        ...formData,
+        key: pos.key,
+        label: pos.label,
+        type: pos.type
+      });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1708,6 +1733,21 @@ function ContentSection() {
       >
         <form className="space-y-4">
           <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-400 uppercase">Website Position</label>
+            <select 
+              onChange={handlePositionChange}
+              value={CONTENT_POSITIONS.some(p => p.key === formData.key) ? formData.key : (formData.key ? "custom" : "")}
+              className="w-full px-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20"
+            >
+              <option value="">Select a position...</option>
+              {CONTENT_POSITIONS.map(pos => (
+                <option key={pos.key} value={pos.key}>{pos.label}</option>
+              ))}
+              <option value="custom">Other / Custom Key</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
             <label className="text-xs font-bold text-slate-400 uppercase">Label (Display Name)</label>
             <input 
               value={formData.label} onChange={e => setFormData({...formData, label: e.target.value})}
@@ -1753,6 +1793,7 @@ function ContentSection() {
     </div>
   );
 }
+
 
 // ─── Main Sidebar Navigation ────────────────────────────────────────────────
 const NAV_ITEMS = [
