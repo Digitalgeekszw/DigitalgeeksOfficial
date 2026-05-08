@@ -58,11 +58,15 @@ export async function configureR2CORS() {
     console.log('R2 CORS configured successfully via API');
   } catch (error) {
     corsConfigureSkipped = true;
+    const denied =
+      /Access Denied|403|Forbidden/i.test(String(error.message)) ||
+      error.name === "AccessDenied";
     console.error(
-      '[R2] PutBucketCors failed; browser uploads need a CORS policy on the bucket. ' +
-        'Add one in Cloudflare: R2 → your bucket → Settings → CORS policy. ' +
-        'See https://developers.cloudflare.com/r2/buckets/cors/',
-      error.message
+      "[R2] PutBucketCors failed — bucket CORS is required for browser PUT uploads.",
+      error.message,
+      denied
+        ? "Your R2 API token likely cannot configure buckets (normal for object-only tokens). Open Cloudflare Dashboard → R2 → this bucket → Settings → CORS policy and add a rule manually. See https://developers.cloudflare.com/r2/buckets/cors/"
+        : "Try adding CORS via Dashboard → R2 → bucket → Settings → CORS policy."
     );
   }
 }
