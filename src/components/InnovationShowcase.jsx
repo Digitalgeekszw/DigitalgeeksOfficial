@@ -48,7 +48,8 @@ const ShowcaseCard = ({ title, category, image, link, index, id }) => {
       </div>
     </motion.div>
   </Link>
-);
+  );
+};
 
 const InnovationShowcase = () => {
   return (
