@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from 'uuid';
 
 // Helper to strip quotes from env variables if they exist
@@ -91,4 +92,33 @@ export async function uploadToR2(fileBuffer, originalFilename, mimeType, folder 
     });
     throw new Error(`Cloudflare R2 Error: ${error.message}`);
   }
+}
+
+/**
+ * Generates a presigned URL for direct upload from the browser
+ * @param {string} fileName 
+ * @param {string} fileType 
+ * @param {string} folder 
+ * @returns {Promise<{uploadUrl: string, publicUrl: string}>}
+ */
+export async function generatePresignedUrl(fileName, fileType, folder = 'content') {
+  if (!s3Client) throw new Error('R2 Client not initialized');
+
+  const uniqueId = uuidv4();
+  const safeFilename = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const fileKey = `${folder}/${uniqueId}-${safeFilename}`;
+
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: fileKey,
+    ContentType: fileType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+  
+  const cleanBaseUrl = R2_PUBLIC_URL.endsWith('/') ? R2_PUBLIC_URL.slice(0, -1) : R2_PUBLIC_URL;
+  const protocolBaseUrl = cleanBaseUrl.startsWith('http') ? cleanBaseUrl : `https://${cleanBaseUrl}`;
+  const publicUrl = `${protocolBaseUrl}/${fileKey}`;
+
+  return { uploadUrl, publicUrl };
 }

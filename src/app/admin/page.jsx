@@ -1619,15 +1619,42 @@ function ContentSection() {
     e.preventDefault();
     setSaving(true);
     try {
+      let finalValue = formData.value;
+
+      if (file) {
+        // 1. Get presigned URL
+        const presignedRes = await fetch("/api/admin/content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: file.name,
+            fileType: file.type,
+            folder: formData.type === "video" ? "videos" : "images"
+          }),
+        });
+
+        if (!presignedRes.ok) throw new Error("Failed to get upload URL");
+        const { uploadUrl, publicUrl } = await presignedRes.json();
+
+        // 2. Upload directly to R2
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type },
+        });
+
+        if (!uploadRes.ok) throw new Error("Upload to cloud failed");
+        finalValue = publicUrl;
+      }
+
+      if (!finalValue) throw new Error("No file or URL provided");
+
+      // 3. Save reference in DB
       const fd = new FormData();
       fd.append("key", formData.key);
       fd.append("label", formData.label);
       fd.append("type", formData.type);
-      if (file) {
-        fd.append("file", file);
-      } else {
-        fd.append("value", formData.value);
-      }
+      fd.append("value", finalValue);
 
       const res = await fetch("/api/admin/content", {
         method: "POST",
@@ -1641,7 +1668,10 @@ function ContentSection() {
         setFormData({ key: "", label: "", type: "image", value: "" });
         fetchData();
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+      alert(e.message || "An error occurred during upload.");
+    }
     setSaving(false);
   };
 
