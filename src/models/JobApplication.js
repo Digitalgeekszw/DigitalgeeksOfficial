@@ -14,6 +14,8 @@ const JobApplicationSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Email is required'],
+    lowercase: true,
+    trim: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,})+$/, 'Please provide a valid email address'],
   },
   phone: {
@@ -23,6 +25,11 @@ const JobApplicationSchema = new mongoose.Schema({
   jobTitle: {
     type: String,
     required: [true, 'Job title is required'],
+  },
+  job: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Job',
+    default: null,
   },
   resumeUrl: {
     type: String,

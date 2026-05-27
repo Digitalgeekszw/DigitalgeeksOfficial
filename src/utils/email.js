@@ -670,3 +670,93 @@ export async function sendManualContractEmail({ firstName, lastName, email, jobT
     attachments: [{ filename: fileName, content: fileBuffer }],
   });
 }
+
+export async function sendNewOpportunityEmail({ to, name, job, jobUrl, customMessage = "" }) {
+  const displayName = name?.trim() || "there";
+  const subject = `New Opportunity: ${job.title} at Digital Geeks`;
+  const accountUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://digitalgeeks.tech"}/careers/account`;
+
+  const text = [
+    `Hi ${displayName},`,
+    ``,
+    customMessage || `Digital Geeks has posted a new opportunity that may be a fit for students and early-career builders.`,
+    ``,
+    `Role: ${job.title}`,
+    `Department: ${job.department}`,
+    `Location: ${job.location}`,
+    `Type: ${job.type}`,
+    ``,
+    job.description,
+    ``,
+    `View and apply: ${jobUrl}`,
+    `Create or sign in to your applicant account to track application statuses: ${accountUrl}`,
+    ``,
+    `Being on this student email list does not create a Digital Geeks applicant account. You only get access after you sign up.`,
+    ``,
+    `--`,
+    `Digital Geeks Careers`,
+  ].join("\n");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:#0f172a;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">Digital Geeks</h1>
+              <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">New career opportunity</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 40px 32px;">
+              <p style="margin:0 0 12px;color:#374151;font-size:15px;line-height:1.6;">Hi ${displayName},</p>
+              <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.6;">${customMessage || "Digital Geeks has posted a new opportunity that may be a fit for students and early-career builders."}</p>
+              <table cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;width:100%;margin-bottom:22px;">
+                <tr>
+                  <td style="padding:18px 20px;">
+                    <h2 style="margin:0 0 10px;color:#0f172a;font-size:20px;">${job.title}</h2>
+                    <p style="margin:0 0 4px;color:#64748b;font-size:13px;">${job.department} &middot; ${job.location} &middot; ${job.type}</p>
+                    <p style="margin:12px 0 0;color:#374151;font-size:14px;line-height:1.6;">${job.description}</p>
+                  </td>
+                </tr>
+              </table>
+              <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                <tr>
+                  <td style="border-radius:8px;background-color:#4f46e5;">
+                    <a href="${jobUrl}" target="_blank" style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;">View Opportunity</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0;color:#64748b;font-size:13px;line-height:1.6;">To track application statuses, create or sign in to your applicant account: <a href="${accountUrl}" style="color:#3b82f6;text-decoration:none;">${accountUrl}</a>.</p>
+              <p style="margin:10px 0 0;color:#94a3b8;font-size:12px;line-height:1.5;">Being on this student email list does not create system access. Access starts only after account sign up.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center;">
+              <p style="margin:0;color:#94a3b8;font-size:12px;">&copy; ${new Date().getFullYear()} Digital Geeks. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  await resend.emails.send({
+    from: "Digital Geeks Careers <careers@digitalgeeks.tech>",
+    reply_to: "careers@digitalgeeks.tech",
+    to,
+    subject,
+    text,
+    html,
+  });
+}

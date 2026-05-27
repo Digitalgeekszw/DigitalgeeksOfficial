@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '../../../../lib/mongodb';
 import InterviewSlot from '../../../../models/InterviewSlot';
+import JobApplication from '../../../../models/JobApplication'; // Required for populate
 import { deleteInterviewEvent } from '../../../../utils/googleCalendar';
 
 // GET all slots (admin)
@@ -8,7 +9,11 @@ export async function GET() {
   try {
     await connectDB();
     const slots = await InterviewSlot.find()
-      .populate('bookedBy', 'firstName lastName email jobTitle')
+      .populate({
+        path: 'bookedBy',
+        select: 'firstName lastName email jobTitle',
+        model: JobApplication
+      })
       .sort({ startTime: 1 });
     return NextResponse.json({ slots }, { status: 200 });
   } catch (error) {
@@ -33,11 +38,11 @@ export async function POST(req) {
     const start = new Date(startTime);
     const end = new Date(endTime);
 
-    if (isNaN(start) || isNaN(end) || end <= start) {
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
       return NextResponse.json({ message: 'Invalid time range.' }, { status: 400 });
     }
 
-    const totalMs = end - start;
+    const totalMs = end.getTime() - start.getTime();
     if (totalMs < SLOT_DURATION_MS) {
       return NextResponse.json({ message: 'Minimum availability window is 30 minutes.' }, { status: 400 });
     }

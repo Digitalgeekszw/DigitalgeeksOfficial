@@ -14,6 +14,7 @@ import {
   FiCalendar, FiStar,
   FiRefreshCw,
 } from "react-icons/fi";
+import MailboxSection from "./MailboxSection";
 
 // ─── Status Config ──────────────────────────────────────────────────────────
 const APPLICATION_STATUSES = ["Pending", "Reviewed", "Invite to Interview", "Schedule Interview", "Interview Scheduled", "Rejected", "Hired"];
@@ -698,6 +699,9 @@ function JobsSection() {
   const [formData, setFormData] = useState({
     title: "", department: "", location: "", type: "Full-time", description: "", details: "", active: true
   });
+  const [notifyStudents, setNotifyStudents] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [sendingJobId, setSendingJobId] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -714,7 +718,7 @@ function JobsSection() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const method = editingItem ? "PATCH" : "POST";
-    const body = editingItem ? { id: editingItem._id, ...formData } : formData;
+    const body = editingItem ? { id: editingItem._id, ...formData } : { ...formData, notifyStudents, notificationMessage };
 
     try {
       const res = await fetch("/api/admin/jobs", {
@@ -726,6 +730,8 @@ function JobsSection() {
         setIsModalOpen(false);
         setEditingItem(null);
         setFormData({ title: "", department: "", location: "", type: "Full-time", description: "", details: "", active: true });
+        setNotifyStudents(false);
+        setNotificationMessage("");
         fetchData();
       }
     } catch (e) { console.error(e); }
@@ -737,6 +743,24 @@ function JobsSection() {
       await fetch(`/api/admin/jobs?id=${id}`, { method: "DELETE" });
       fetchData();
     } catch (e) { console.error(e); }
+  };
+
+  const handleNotify = async (job) => {
+    setSendingJobId(job._id);
+    try {
+      const res = await fetch("/api/admin/student-emails/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: job._id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to send notifications.");
+      alert("Sent " + data.sent + " opportunity email(s). " + data.failed + " failed.");
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "Unable to send notifications.");
+    }
+    setSendingJobId(null);
   };
 
   const handleEdit = (job) => {
@@ -760,7 +784,7 @@ function JobsSection() {
         description="Add, edit, or remove career opportunities from the website."
         actions={(
           <button 
-            onClick={() => { setEditingItem(null); setFormData({ title: "", department: "", location: "", type: "Full-time", description: "", details: "", active: true }); setIsModalOpen(true); }}
+            onClick={() => { setEditingItem(null); setFormData({ title: "", department: "", location: "", type: "Full-time", description: "", details: "", active: true }); setNotifyStudents(false); setNotificationMessage(""); setIsModalOpen(true); }}
             className="px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20"
           >
             <FiPlus /> Post a New Job
@@ -801,6 +825,9 @@ function JobsSection() {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    <button onClick={() => handleNotify(job)} disabled={sendingJobId === job._id || !job.active} className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50">
+                      {sendingJobId === job._id ? "Sending..." : "Notify List"}
+                    </button>
                     <button onClick={() => handleEdit(job)} className="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-colors">
                       <FiEdit2 size={16} />
                     </button>
@@ -889,6 +916,29 @@ function JobsSection() {
             />
             <label htmlFor="active" className="text-sm font-medium text-slate-700 cursor-pointer">Live / Active</label>
           </div>
+          {!editingItem && (
+            <div className="space-y-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="notifyStudents"
+                  checked={notifyStudents}
+                  onChange={(e) => setNotifyStudents(e.target.checked)}
+                  className="w-5 h-5 text-indigo-600 bg-white border-indigo-200 rounded focus:ring-indigo-500"
+                />
+                <label htmlFor="notifyStudents" className="text-sm font-bold text-slate-800 cursor-pointer">Email this new opportunity to the student list</label>
+              </div>
+              <textarea
+                value={notificationMessage}
+                onChange={(e) => setNotificationMessage(e.target.value)}
+                disabled={!notifyStudents}
+                rows="2"
+                placeholder="Optional custom message for the email"
+                className="w-full px-4 py-2.5 bg-white border border-indigo-100 rounded-xl text-sm focus:ring-2 ring-indigo-500/20 resize-none disabled:opacity-50"
+              />
+              <p className="text-xs text-slate-500">CSV-imported students receive the email, but they still need to create an applicant account before accessing the portal.</p>
+            </div>
+          )}
         </form>
       </Modal>
     </div>
@@ -1069,8 +1119,14 @@ function InterviewSlotsSection() {
       if (res.ok) {
         setPendingSlot(null);
         fetchSlots();
+      } else {
+        const errorData = await res.json();
+        alert(`Error: ${errorData.message || "Failed to create slots"}`);
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+      alert("An error occurred while creating slots. Please check your connection.");
+    }
     setSaving(false);
   };
 
@@ -1866,7 +1922,9 @@ function ContentSection() {
 const NAV_ITEMS = [
   { id: "dashboard",  label: "Overview",        icon: FiGrid },
   { id: "applicants", label: "Applicants",      icon: FiUsers },
+  { id: "emails",     label: "Mailbox",         icon: FiMail },
   { id: "contacts",   label: "Contacts",        icon: FiMail },
+  { id: "students",   label: "Student Emails",  icon: FiMail },
   { id: "jobs",       label: "Jobs",            icon: FiBriefcase },
   { id: "slots",      label: "Interview Slots", icon: FiCalendar },
   { id: "zimsensei",  label: "ZimSensei Pilot", icon: FiStar },
@@ -1881,13 +1939,20 @@ export default function RevolutAdminPanel() {
   useEffect(() => {
     const fetchGlobalStats = async () => {
       try {
-        const [aRes, cRes, jRes, zRes] = await Promise.all([
+        const [aRes, cRes, jRes, zRes, eRes] = await Promise.all([
           fetch("/api/admin/applicants"),
           fetch("/api/admin/contacts"),
           fetch("/api/admin/jobs"),
           fetch("/api/admin/zimsensei-pilot"),
+          fetch("/api/admin/emails?limit=1"), // Just to get the total and maybe we can add unread count to API
         ]);
-        const [aJson, cJson, jJson, zJson] = await Promise.all([aRes.json(), cRes.json(), jRes.json(), zRes.json()]);
+        const [aJson, cJson, jJson, zJson, eJson] = await Promise.all([
+          aRes.json(), cRes.json(), jRes.json(), zRes.json(), eRes.json()
+        ]);
+        
+        // We might want to update the emails API to return unread count specifically
+        // But for now let's just use the total or fetch unread count separately if needed.
+        
         setStats({
           applicants: aJson.total || aJson.applications?.length || 0,
           contacts: cJson.total || cJson.contacts?.length || 0,
@@ -1895,6 +1960,7 @@ export default function RevolutAdminPanel() {
           pendingReview: aJson.applications?.filter(a => a.status === "Pending").length || 0,
           pilotTotal: zJson.total || zJson.applications?.length || 0,
           pilotPending: zJson.applications?.filter(a => a.status === "Pending").length || 0,
+          unreadEmails: eJson.unreadCount || 0, // I should update the API to return this
         });
       } catch (err) { console.error(err); }
     };
@@ -1934,6 +2000,11 @@ export default function RevolutAdminPanel() {
                 {item.id === "applicants" && stats.pendingReview > 0 && isSidebarOpen && (
                   <span className="ml-auto bg-indigo-600 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center border-2 border-white">
                     {stats.pendingReview}
+                  </span>
+                )}
+                {item.id === "emails" && stats.unreadEmails > 0 && isSidebarOpen && (
+                  <span className="ml-auto bg-blue-600 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center border-2 border-white">
+                    {stats.unreadEmails}
                   </span>
                 )}
                 {item.id === "zimsensei" && stats.pilotPending > 0 && isSidebarOpen && (
@@ -1999,10 +2070,12 @@ export default function RevolutAdminPanel() {
             >
               {activeTab === "dashboard" && <DashboardOverview stats={stats} setActiveTab={setActiveTab} />}
               {activeTab === "applicants" && <ApplicantsSection />}
+              {activeTab === "emails" && <MailboxSection />}
               {activeTab === "contacts" && <ContactsSection />}
               {activeTab === "jobs" && <JobsSection />}
               {activeTab === "slots" && <InterviewSlotsSection />}
               {activeTab === "zimsensei" && <ZimsenseiPilotSection />}
+              {activeTab === "students" && <StudentEmailsSection />}
               {activeTab === "content" && <ContentSection />}
             </motion.div>
           </AnimatePresence>
@@ -2012,3 +2085,161 @@ export default function RevolutAdminPanel() {
   );
 }
 
+
+function StudentEmailsSection() {
+  const [items, setItems] = useState([]);
+  const [stats, setStats] = useState({ total: 0, subscribed: 0, accounts: 0 });
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [file, setFile] = useState(null);
+  const [message, setMessage] = useState("");
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/student-emails", { cache: "no-store" });
+      const data = await res.json();
+      setItems(data.subscribers || []);
+      setStats({ total: data.total || 0, subscribed: data.subscribed || 0, accounts: data.accounts || 0 });
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const addEmail = async (e) => {
+    e.preventDefault();
+    setMessage("Saving...");
+    try {
+      const res = await fetch("/api/admin/student-emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "manual" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to add email.");
+      setEmail("");
+      setMessage(`Imported ${data.imported} email(s).`);
+      fetchData();
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
+  const uploadCsv = async (e) => {
+    e.preventDefault();
+    if (!file) return;
+    setMessage("Importing CSV...");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("source", "csv");
+      const res = await fetch("/api/admin/student-emails", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to import CSV.");
+      setFile(null);
+      setMessage(`Imported ${data.imported} email(s). ${data.failed || 0} failed.`);
+      fetchData();
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
+  const toggleSubscribed = async (subscriber) => {
+    await fetch("/api/admin/student-emails", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: subscriber._id, subscribed: !subscriber.subscribed }),
+    });
+    fetchData();
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        title="Student Email List"
+        description="Import student emails for opportunity alerts. Imported emails do not create applicant accounts or portal access."
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          { label: "Total Emails", value: stats.total },
+          { label: "Subscribed", value: stats.subscribed },
+          { label: "Applicant Accounts", value: stats.accounts },
+        ].map((card) => (
+          <div key={card.label} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">{card.label}</p>
+            <p className="text-3xl font-extrabold text-slate-900 mt-2">{card.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <form onSubmit={uploadCsv} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="font-bold text-slate-900">Import CSV</h3>
+          <p className="text-sm text-slate-500">Upload a CSV or text file containing student email addresses. This only subscribes them to alerts.</p>
+          <input
+            type="file"
+            accept=".csv,text/csv,text/plain"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-semibold file:px-3 file:py-1"
+          />
+          <button disabled={!file} className="px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50">Import Emails</button>
+        </form>
+
+        <form onSubmit={addEmail} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="font-bold text-slate-900">Add Single Email</h3>
+          <p className="text-sm text-slate-500">Add one student to the opportunity notification list.</p>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="student@example.com"
+            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 ring-indigo-500/20"
+            required
+          />
+          <button className="px-5 py-2.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800">Add Email</button>
+        </form>
+      </div>
+
+      {message && <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-700 text-sm font-semibold">{message}</div>}
+
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="px-6 py-4 font-bold text-slate-600">Email</th>
+              <th className="px-6 py-4 font-bold text-slate-600">Source</th>
+              <th className="px-6 py-4 font-bold text-slate-600">Portal Account</th>
+              <th className="px-6 py-4 font-bold text-slate-600">Subscribed</th>
+              <th className="px-6 py-4 text-right font-bold text-slate-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {loading ? (
+              [1,2,3].map(i => <tr key={i} className="animate-pulse"><td colSpan="5" className="px-6 py-8"><div className="h-4 bg-slate-100 rounded w-full"></div></td></tr>)
+            ) : items.length === 0 ? (
+              <tr><td colSpan="5" className="px-6 py-16 text-center text-slate-400">No student emails imported yet</td></tr>
+            ) : items.map((subscriber) => (
+              <tr key={subscriber._id} className="hover:bg-slate-50/50">
+                <td className="px-6 py-4 font-semibold text-slate-900">{subscriber.email}</td>
+                <td className="px-6 py-4 text-slate-500 capitalize">{subscriber.source}</td>
+                <td className="px-6 py-4">
+                  {subscriber.hasAccount ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Created</Badge> : <Badge className="bg-slate-100 text-slate-500 border-slate-200">No account</Badge>}
+                </td>
+                <td className="px-6 py-4">
+                  {subscriber.subscribed ? <Badge className="bg-blue-50 text-blue-700 border-blue-200">Yes</Badge> : <Badge className="bg-red-50 text-red-700 border-red-200">No</Badge>}
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <button onClick={() => toggleSubscribed(subscriber)} className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
+                    {subscriber.subscribed ? "Unsubscribe" : "Subscribe"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

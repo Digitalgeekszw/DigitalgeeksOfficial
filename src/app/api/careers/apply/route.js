@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "../../../../lib/mongodb";
 import JobApplication from "../../../../models/JobApplication";
 import { uploadToR2 } from "../../../../utils/r2";
+import { normalizeEmail } from "../../../../utils/applicantAuth";
 
 export async function POST(req) {
   try {
@@ -21,9 +22,10 @@ export async function POST(req) {
     // Extract text fields
     const firstName = formData.get("firstName");
     const lastName = formData.get("lastName");
-    const email = formData.get("email");
+    const email = normalizeEmail(formData.get("email"));
     const phone = formData.get("phone");
     const jobTitle = formData.get("jobTitle");
+    const jobId = formData.get("jobId");
     const coverLetter = formData.get("coverLetter") || "";
 
     // Extract file
@@ -70,6 +72,7 @@ export async function POST(req) {
       email,
       phone,
       jobTitle,
+      job: jobId || null,
       resumeUrl,
       coverLetter,
       status: "Pending"

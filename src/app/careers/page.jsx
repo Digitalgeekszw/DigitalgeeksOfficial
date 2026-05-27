@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Navbar, Footer } from "../../components";
-import { FiSearch, FiMapPin, FiBriefcase, FiArrowRight } from "react-icons/fi";
+import { FiSearch, FiMapPin, FiBriefcase, FiArrowRight, FiBell, FiUser } from "react-icons/fi";
 import styles from "../../style";
 import { JOB_LISTINGS } from "../../data/jobs";
 
@@ -12,6 +12,8 @@ export default function CareersPage() {
   const [activeChip, setActiveChip] = useState("All");
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifyStatus, setNotifyStatus] = useState("");
 
   React.useEffect(() => {
     const fetchJobs = async () => {
@@ -27,6 +29,24 @@ export default function CareersPage() {
     };
     fetchJobs();
   }, []);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    setNotifyStatus("Saving...");
+    try {
+      const res = await fetch("/api/careers/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: notifyEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Unable to subscribe.");
+      setNotifyStatus("You will receive new opportunity emails.");
+      setNotifyEmail("");
+    } catch (error) {
+      setNotifyStatus(error.message);
+    }
+  };
 
   const departments = ["All", ...Array.from(new Set(jobs.map(job => job.department)))];
 
@@ -90,6 +110,27 @@ export default function CareersPage() {
               className="w-full pl-12 pr-4 py-4 rounded-full border border-[#dadce0] focus:outline-none focus:border-[#1a73e8] focus:shadow-[0_1px_6px_rgba(32,33,36,0.28)] transition-shadow text-[16px] text-[#202124] bg-white placeholder:text-[#5f6368]"
             />
           </div>
+
+          <div className="mt-6 w-full max-w-3xl grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 bg-white border border-[#dadce0] rounded-[20px] p-3 text-left">
+              <div className="flex items-center gap-3 flex-1 px-2">
+                <FiBell className="text-[#1a73e8] shrink-0" />
+                <input
+                  type="email"
+                  value={notifyEmail}
+                  onChange={(e) => setNotifyEmail(e.target.value)}
+                  placeholder="Get emails for new opportunities"
+                  className="w-full outline-none text-[#202124] placeholder:text-[#5f6368]"
+                  required
+                />
+              </div>
+              <button className="px-5 py-3 rounded-full bg-[#1a73e8] text-white font-medium hover:bg-[#1765cc]">Notify me</button>
+            </form>
+            <Link href="/careers/account" className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-[#dadce0] bg-white text-[#1a73e8] font-medium hover:bg-[#f8f9fa]">
+              <FiUser /> Applicant portal
+            </Link>
+          </div>
+          {notifyStatus && <p className="mt-3 text-sm text-[#5f6368]">{notifyStatus}</p>}
         </div>
       </div>
 

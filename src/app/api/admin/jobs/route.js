@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "../../../../lib/mongodb";
 import Job from "../../../../models/Job";
+import { notifyOpportunitySubscribers } from "../../../../utils/opportunityNotifications";
 
 export async function GET() {
   try {
@@ -17,9 +18,20 @@ export async function POST(req) {
   try {
     await connectDB();
     const body = await req.json();
-    
-    const newJob = await Job.create(body);
-    return NextResponse.json({ message: "Job created successfully", job: newJob }, { status: 201 });
+    const { notifyStudents, notificationMessage, ...jobData } = body;
+
+    const newJob = await Job.create(jobData);
+    let notification = null;
+    if (notifyStudents && newJob.active) {
+      try {
+        notification = await notifyOpportunitySubscribers(newJob, notificationMessage || "");
+      } catch (emailError) {
+        console.error("Failed to notify student email list:", emailError);
+        notification = { error: emailError.message };
+      }
+    }
+
+    return NextResponse.json({ message: "Job created successfully", job: newJob, notification }, { status: 201 });
   } catch (error) {
     console.error("Admin Jobs POST Error:", error);
     return NextResponse.json({ message: "Failed to create job", error: error.message }, { status: 500 });
