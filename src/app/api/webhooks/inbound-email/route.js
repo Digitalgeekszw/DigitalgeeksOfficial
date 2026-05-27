@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import connectDB from "../../../../../lib/mongodb";
-import ReceivedEmail from "../../../../../models/ReceivedEmail";
+import connectDB from "../../../../lib/mongodb";
+import ReceivedEmail from "../../../../models/ReceivedEmail";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
