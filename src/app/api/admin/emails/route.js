@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import connectDB from "../../../../lib/mongodb";
 import ReceivedEmail from "../../../../models/ReceivedEmail";
-import { Resend } from "resend";
+import SentEmail from "../../../../models/SentEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -16,11 +17,22 @@ function normalizeRecipients(value) {
   return recipients.map((email) => email.trim()).filter(Boolean);
 }
 
-function getMailboxFromAddress(value) {
+function getMailboxAddress(value) {
   const address = String(value || "").trim().toLowerCase();
-  const mailbox = ALLOWED_FROM_ADDRESSES.has(address) ? address : "contact@digitalgeeks.tech";
+  return ALLOWED_FROM_ADDRESSES.has(address) ? address : "contact@digitalgeeks.tech";
+}
+
+function getMailboxFromAddress(value) {
+  const mailbox = getMailboxAddress(value);
   const label = mailbox.startsWith("careers@") ? "Digital Geeks Careers" : "Digital Geeks";
   return `${label} <${mailbox}>`;
+}
+
+function getSearchQuery(search, fields) {
+  if (!search) return {};
+  return {
+    $or: fields.map((field) => ({ [field]: { $regex: search, $options: "i" } })),
+  };
 }
 
 export async function GET(req) {
@@ -28,27 +40,27 @@ export async function GET(req) {
     await connectDB();
 
     const { searchParams } = new URL(req.url);
+    const folder = searchParams.get("folder") === "sent" ? "sent" : "inbox";
     const search = searchParams.get("search");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
     const skip = (page - 1) * limit;
 
-    const query = {};
-    if (search) {
-      query.$or = [
-        { from: { $regex: search, $options: "i" } },
-        { subject: { $regex: search, $options: "i" } },
-        { text: { $regex: search, $options: "i" } },
-      ];
-    }
+    const Model = folder === "sent" ? SentEmail : ReceivedEmail;
+    const sortField = folder === "sent" ? "sentAt" : "receivedAt";
+    const query = getSearchQuery(search, folder === "sent"
+      ? ["to", "subject", "text"]
+      : ["from", "subject", "text"]
+    );
 
-    const [emails, total, unreadCount] = await Promise.all([
-      ReceivedEmail.find(query).sort({ receivedAt: -1 }).skip(skip).limit(limit),
-      ReceivedEmail.countDocuments(query),
+    const [emails, total, unreadCount, sentCount] = await Promise.all([
+      Model.find(query).sort({ [sortField]: -1 }).skip(skip).limit(limit),
+      Model.countDocuments(query),
       ReceivedEmail.countDocuments({ isRead: false }),
+      SentEmail.countDocuments({}),
     ]);
 
-    return NextResponse.json({ emails, total, unreadCount, page, limit }, { status: 200 });
+    return NextResponse.json({ emails, total, unreadCount, sentCount, page, limit, folder }, { status: 200 });
   } catch (error) {
     console.error("Admin Emails GET Error:", error);
     return NextResponse.json({ message: "Failed to fetch emails", error: error.message }, { status: 500 });
@@ -78,8 +90,7 @@ export async function POST(req) {
       return NextResponse.json({ message: "Message is required." }, { status: 400 });
     }
 
-    const replyTo = String(fromMailbox || "").trim().toLowerCase();
-    const safeReplyTo = ALLOWED_FROM_ADDRESSES.has(replyTo) ? replyTo : "contact@digitalgeeks.tech";
+    const safeReplyTo = getMailboxAddress(fromMailbox);
     const { data, error } = await resend.emails.send({
       from: getMailboxFromAddress(safeReplyTo),
       reply_to: safeReplyTo,
@@ -96,7 +107,17 @@ export async function POST(req) {
       );
     }
 
-    return NextResponse.json({ message: "Email sent successfully", id: data?.id }, { status: 200 });
+    await connectDB();
+    const sentEmail = await SentEmail.create({
+      from: safeReplyTo,
+      to: recipients,
+      subject: trimmedSubject,
+      text: trimmedMessage,
+      resendId: data?.id,
+      sentAt: new Date(),
+    });
+
+    return NextResponse.json({ message: "Email sent successfully", id: data?.id, email: sentEmail }, { status: 200 });
   } catch (error) {
     console.error("Admin Emails POST Error:", error);
     return NextResponse.json({ message: "Failed to send email", error: error.message }, { status: 500 });
@@ -129,12 +150,14 @@ export async function DELETE(req) {
     await connectDB();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
+    const folder = searchParams.get("folder") === "sent" ? "sent" : "inbox";
 
     if (!id) {
       return NextResponse.json({ message: "ID is required." }, { status: 400 });
     }
 
-    const deleted = await ReceivedEmail.findByIdAndDelete(id);
+    const Model = folder === "sent" ? SentEmail : ReceivedEmail;
+    const deleted = await Model.findByIdAndDelete(id);
     if (!deleted) {
       return NextResponse.json({ message: "Email not found." }, { status: 404 });
     }
