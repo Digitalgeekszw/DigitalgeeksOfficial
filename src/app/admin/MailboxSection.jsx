@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { 
   FiSearch, FiFilter, FiTrash2, FiMail, 
   FiChevronRight, FiChevronLeft, FiRefreshCw, 
-  FiClock, FiUser, FiArrowLeft, FiSend
+  FiClock, FiUser, FiArrowLeft, FiSend, FiBriefcase
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -26,8 +26,54 @@ function SectionHeader({ title, description, actions }) {
       <div className="flex items-center gap-3">
         {actions}
       </div>
+
     </div>
   );
+}
+
+const INITIAL_COMPOSE = {
+  isOpen: false,
+  mode: "reply",
+  to: "",
+  subject: "",
+  message: "",
+  error: "",
+  success: "",
+};
+
+function extractEmailAddress(value) {
+  const match = String(value || "").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return match?.[0] || "";
+}
+
+function withPrefix(prefix, subject) {
+  const cleanSubject = subject || "(No Subject)";
+  return cleanSubject.toLowerCase().startsWith(`${prefix.toLowerCase()}:`)
+    ? cleanSubject
+    : `${prefix}: ${cleanSubject}`;
+}
+
+function getMailboxAddress(email) {
+  const recipients = Array.isArray(email?.to) ? email.to : [];
+  const mailbox = recipients.map(extractEmailAddress).find((address) =>
+    ["contact@digitalgeeks.tech", "careers@digitalgeeks.tech"].includes(address.toLowerCase())
+  );
+  return mailbox || "contact@digitalgeeks.tech";
+}
+
+function buildOriginalMessageBlock(email) {
+  const receivedAt = email?.receivedAt ? new Date(email.receivedAt).toLocaleString() : "";
+  return [
+    "",
+    "",
+    "--- Original message ---",
+    `From: ${email?.from || ""}`,
+    `To: ${Array.isArray(email?.to) ? email.to.join(", ") : ""}`,
+    `Date: ${receivedAt}`,
+    `Subject: ${email?.subject || "(No Subject)"}`,
+    "",
+    email?.text || "",
+  ].join("\n");
 }
 
 export default function MailboxSection() {
@@ -37,6 +83,8 @@ export default function MailboxSection() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [compose, setCompose] = useState(INITIAL_COMPOSE);
+  const [sending, setSending] = useState(false);
   const limit = 20;
 
   const fetchEmails = useCallback(async () => {
@@ -92,6 +140,55 @@ export default function MailboxSection() {
     setSelectedEmail(email);
     if (!email.isRead) {
       handleMarkAsRead(email._id, true);
+    }
+  };
+
+  const openCompose = (mode) => {
+    if (!selectedEmail) return;
+
+    setCompose({
+      ...INITIAL_COMPOSE,
+      isOpen: true,
+      mode,
+      to: mode === "reply" ? extractEmailAddress(selectedEmail.from) : "",
+      subject: withPrefix(mode === "reply" ? "Re" : "Fwd", selectedEmail.subject),
+      message: mode === "forward" ? buildOriginalMessageBlock(selectedEmail) : "",
+    });
+  };
+
+  const closeCompose = () => {
+    if (sending) return;
+    setCompose(INITIAL_COMPOSE);
+  };
+
+  const handleSendEmail = async (event) => {
+    event.preventDefault();
+    setSending(true);
+    setCompose(prev => ({ ...prev, error: "", success: "" }));
+
+    try {
+      const res = await fetch("/api/admin/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: compose.to,
+          subject: compose.subject,
+          message: compose.message,
+          fromMailbox: getMailboxAddress(selectedEmail),
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || data.message || "Failed to send email");
+      }
+
+      setCompose(prev => ({ ...prev, success: "Email sent successfully.", message: "" }));
+      setTimeout(() => setCompose(INITIAL_COMPOSE), 900);
+    } catch (error) {
+      setCompose(prev => ({ ...prev, error: error.message }));
+    } finally {
+      setSending(false);
     }
   };
 
@@ -271,10 +368,16 @@ export default function MailboxSection() {
 
               <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
                 <div className="flex gap-3">
-                  <button className="flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => openCompose("reply")}
+                    className="flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                  >
                     <FiSend className="text-slate-400" /> Reply
                   </button>
-                  <button className="flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => openCompose("forward")}
+                    className="flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                  >
                     Forward
                   </button>
                 </div>
@@ -291,6 +394,77 @@ export default function MailboxSection() {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {compose.isOpen && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+              onClick={closeCompose}
+            />
+            <motion.form
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              onSubmit={handleSendEmail}
+              className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            >
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-slate-900">{compose.mode === "reply" ? "Reply" : "Forward"}</h3>
+                  <p className="text-xs text-slate-400 mt-1">From {getMailboxAddress(selectedEmail)}</p>
+                </div>
+                <button type="button" onClick={closeCompose} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-lg">
+                  x
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4 overflow-y-auto">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 uppercase">To</label>
+                  <input
+                    value={compose.to}
+                    onChange={e => setCompose(prev => ({ ...prev, to: e.target.value }))}
+                    placeholder="recipient@example.com"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 ring-indigo-500/20 outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 uppercase">Subject</label>
+                  <input
+                    value={compose.subject}
+                    onChange={e => setCompose(prev => ({ ...prev, subject: e.target.value }))}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 ring-indigo-500/20 outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 uppercase">Message</label>
+                  <textarea
+                    value={compose.message}
+                    onChange={e => setCompose(prev => ({ ...prev, message: e.target.value }))}
+                    rows={12}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm leading-relaxed focus:ring-2 ring-indigo-500/20 outline-none resize-none"
+                  />
+                </div>
+                {compose.error && <p className="text-sm font-semibold text-red-600">{compose.error}</p>}
+                {compose.success && <p className="text-sm font-semibold text-emerald-600">{compose.success}</p>}
+              </div>
+
+              <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+                <button type="button" onClick={closeCompose} disabled={sending} className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+                  Cancel
+                </button>
+                <button type="submit" disabled={sending} className="px-4 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2">
+                  <FiSend /> {sending ? "Sending..." : "Send"}
+                </button>
+              </div>
+            </motion.form>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

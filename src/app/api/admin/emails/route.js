@@ -1,6 +1,27 @@
 import { NextResponse } from "next/server";
 import connectDB from "../../../../lib/mongodb";
 import ReceivedEmail from "../../../../models/ReceivedEmail";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALLOWED_FROM_ADDRESSES = new Set([
+  "contact@digitalgeeks.tech",
+  "careers@digitalgeeks.tech",
+]);
+
+function normalizeRecipients(value) {
+  const recipients = Array.isArray(value) ? value : String(value || "").split(",");
+  return recipients.map((email) => email.trim()).filter(Boolean);
+}
+
+function getMailboxFromAddress(value) {
+  const address = String(value || "").trim().toLowerCase();
+  const mailbox = ALLOWED_FROM_ADDRESSES.has(address) ? address : "contact@digitalgeeks.tech";
+  const label = mailbox.startsWith("careers@") ? "Digital Geeks Careers" : "Digital Geeks";
+  return `${label} <${mailbox}>`;
+}
 
 export async function GET(req) {
   try {
@@ -31,6 +52,54 @@ export async function GET(req) {
   } catch (error) {
     console.error("Admin Emails GET Error:", error);
     return NextResponse.json({ message: "Failed to fetch emails", error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(req) {
+  try {
+    const { to, subject, message, fromMailbox } = await req.json();
+    const recipients = normalizeRecipients(to);
+    const trimmedSubject = String(subject || "").trim();
+    const trimmedMessage = String(message || "").trim();
+
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ message: "RESEND_API_KEY is not configured." }, { status: 503 });
+    }
+
+    if (recipients.length === 0 || recipients.some((email) => !EMAIL_REGEX.test(email))) {
+      return NextResponse.json({ message: "A valid recipient email is required." }, { status: 400 });
+    }
+
+    if (!trimmedSubject) {
+      return NextResponse.json({ message: "Subject is required." }, { status: 400 });
+    }
+
+    if (!trimmedMessage) {
+      return NextResponse.json({ message: "Message is required." }, { status: 400 });
+    }
+
+    const replyTo = String(fromMailbox || "").trim().toLowerCase();
+    const safeReplyTo = ALLOWED_FROM_ADDRESSES.has(replyTo) ? replyTo : "contact@digitalgeeks.tech";
+    const { data, error } = await resend.emails.send({
+      from: getMailboxFromAddress(safeReplyTo),
+      reply_to: safeReplyTo,
+      to: recipients,
+      subject: trimmedSubject,
+      text: trimmedMessage,
+    });
+
+    if (error) {
+      console.error("Admin Emails POST Resend Error:", error);
+      return NextResponse.json(
+        { message: "Failed to send email", error: error.message || "Resend rejected the email." },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ message: "Email sent successfully", id: data?.id }, { status: 200 });
+  } catch (error) {
+    console.error("Admin Emails POST Error:", error);
+    return NextResponse.json({ message: "Failed to send email", error: error.message }, { status: 500 });
   }
 }
 
