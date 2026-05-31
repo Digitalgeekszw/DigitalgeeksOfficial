@@ -17,23 +17,14 @@ export async function POST(req) {
 
     const { email_id, from, to, subject } = payload.data;
 
-    // Fetch full email content from Resend
-    // Note: The SDK might not have 'emails.receive.get' yet depending on version, 
-    // so we can use fetch as a fallback if needed, but let's try the SDK approach first or use fetch directly.
-    
-    const response = await fetch(`https://api.resend.com/emails/receive/${email_id}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-    });
+    // Fetch full email content from Resend using SDK
+    const { data: emailData, error: sdkError } = await resend.emails.receiving.get(email_id);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Failed to fetch email content from Resend:", errorText);
-      throw new Error(`Resend API error: ${response.status}`);
+    if (sdkError) {
+      console.error("Failed to fetch email content from Resend:", sdkError);
+      throw new Error(`Resend SDK error: ${sdkError.message}`);
     }
 
-    const emailData = await response.json();
     console.log("Fetched Email Data:", JSON.stringify(emailData, null, 2));
 
     await connectDB();

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
 import Contact from "../../../models/Contact";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
@@ -25,6 +28,33 @@ export async function POST(req) {
       phone: body.phone || "",
       message: body.message,
     });
+
+    // Send email notification to the team
+    try {
+      await resend.emails.send({
+        from: "Digital Geeks Contact Form <contact@digitalgeeks.tech>",
+        to: "contact@digitalgeeks.tech",
+        subject: `New Inquiry from ${body.firstName} ${body.lastName}`,
+        text: `New contact inquiry:
+        
+        Name: ${body.firstName} ${body.lastName}
+        Email: ${body.email}
+        Company: ${body.company || "N/A"}
+        Phone: ${body.phone || "N/A"}
+        Message: ${body.message}`,
+        html: `
+        <h1>New Contact Inquiry</h1>
+        <p><strong>Name:</strong> ${body.firstName} ${body.lastName}</p>
+        <p><strong>Email:</strong> ${body.email}</p>
+        <p><strong>Company:</strong> ${body.company || "N/A"}</p>
+        <p><strong>Phone:</strong> ${body.phone || "N/A"}</p>
+        <p><strong>Message:</strong> ${body.message}</p>
+        `,
+      });
+    } catch (emailError) {
+      console.error("Failed to send contact notification email:", emailError);
+      // We don't fail the request if just the email fails, but we log it.
+    }
 
     return NextResponse.json(
       { message: "Inquiry submitted successfully", contact: newContact },
