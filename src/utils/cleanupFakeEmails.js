@@ -1,18 +1,14 @@
 import mongoose from "mongoose";
 import Contact from "../models/Contact";
 import ReceivedEmail from "../models/ReceivedEmail";
-import { classifyContactSubmission, classifyInboundEmail } from "./spamFilter";
+import StudentEmailSubscriber from "../models/StudentEmailSubscriber";
+import { classifyContactSubmission, classifyInboundEmail, isFakeSignupEmail } from "./spamFilter";
 
-const CLEANUP_FLAG_ID = "cleanup_fake_emails_v1";
-const KNOWN_SPAM_EMAILS = new Set([
-  "o.lo.la.c4.305@gmail.com",
-]);
+const CLEANUP_FLAG_ID = "cleanup_fake_emails_v2";
 
 let started = false;
 
 function isKnownSpamContact(contact) {
-  const email = String(contact.email || "").trim().toLowerCase();
-  if (KNOWN_SPAM_EMAILS.has(email)) return true;
   return classifyContactSubmission(contact) === "spam";
 }
 
@@ -21,24 +17,31 @@ function isJunkReceivedEmail(email) {
 }
 
 export async function deleteFakeEmails() {
-  const [contacts, emails] = await Promise.all([
+  const [contacts, emails, subscribers] = await Promise.all([
     Contact.find({}).select("firstName lastName company email message").lean(),
     ReceivedEmail.find({}).select("from subject text html").lean(),
+    StudentEmailSubscriber.find({}).select("email").lean(),
   ]);
 
   const spamContactIds = contacts.filter(isKnownSpamContact).map((doc) => doc._id);
   const junkEmailIds = emails.filter(isJunkReceivedEmail).map((doc) => doc._id);
+  const spamSubscriberIds = subscribers
+    .filter((doc) => isFakeSignupEmail(doc.email))
+    .map((doc) => doc._id);
 
-  const [contactResult, emailResult] = await Promise.all([
+  const [contactResult, emailResult, subscriberResult] = await Promise.all([
     spamContactIds.length ? Contact.deleteMany({ _id: { $in: spamContactIds } }) : { deletedCount: 0 },
     junkEmailIds.length ? ReceivedEmail.deleteMany({ _id: { $in: junkEmailIds } }) : { deletedCount: 0 },
+    spamSubscriberIds.length ? StudentEmailSubscriber.deleteMany({ _id: { $in: spamSubscriberIds } }) : { deletedCount: 0 },
   ]);
 
   return {
     contactsScanned: contacts.length,
     emailsScanned: emails.length,
+    subscribersScanned: subscribers.length,
     contactsDeleted: contactResult.deletedCount || 0,
     emailsDeleted: emailResult.deletedCount || 0,
+    subscribersDeleted: subscriberResult.deletedCount || 0,
   };
 }
 

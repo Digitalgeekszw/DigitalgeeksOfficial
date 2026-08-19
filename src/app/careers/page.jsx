@@ -13,6 +13,7 @@ export default function CareersPage() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifyWebsite, setNotifyWebsite] = useState("");
   const [notifyStatus, setNotifyStatus] = useState("");
 
   React.useEffect(() => {
@@ -37,12 +38,13 @@ export default function CareersPage() {
       const res = await fetch("/api/careers/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: notifyEmail }),
+        body: JSON.stringify({ email: notifyEmail, website: notifyWebsite }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Unable to subscribe.");
       setNotifyStatus("You will receive new opportunity emails.");
       setNotifyEmail("");
+      setNotifyWebsite("");
     } catch (error) {
       setNotifyStatus(error.message);
     }
@@ -113,6 +115,17 @@ export default function CareersPage() {
 
           <div className="mt-6 w-full max-w-3xl grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 bg-white border border-[#dadce0] rounded-[20px] p-3 text-left">
+              <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                <label htmlFor="notify-website">Website</label>
+                <input
+                  id="notify-website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={notifyWebsite}
+                  onChange={(e) => setNotifyWebsite(e.target.value)}
+                />
+              </div>
               <div className="flex items-center gap-3 flex-1 px-2">
                 <FiBell className="text-[#1a73e8] shrink-0" />
                 <input

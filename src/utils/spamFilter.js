@@ -46,8 +46,55 @@ export function isRateLimited(ip) {
   return false;
 }
 
+export const KNOWN_FAKE_SIGNUP_EMAILS = new Set([
+  "o.lo.la.c4.305@gmail.com",
+  "l.ebum.oqih.o.7.39@gmail.com",
+  "fr.eder.ik.re.in.el.t@gmail.com",
+  "kendeni@yahoo.com",
+  "marketing@yoobi.nl",
+  "frank.janssen@yoobi.nl",
+  "ellie.carlstrom@hotmail.com",
+  "k.r.ist.inha.nkin.s@gmail.com",
+  "tomharaske@aol.com",
+  "natalierose@thecakeryct.com",
+  "jan.hartmann@spacetech-i.com",
+  "clschultz@gmx.de",
+  "reservation@marinoroyal.com",
+  "bbjraf@yahoo.com",
+  "ap@hnhsd.org",
+  "sfcjoh.ns.o.n.1.95.0@gmail.com",
+  "ridered_2005@hotmail.com",
+  "daniel_crouch1@icloud.com",
+  "charlie@selainvestments.com",
+  "aust.i.n.b.ob.by.3@gmail.com",
+  "a.nika.ca.sh.w.ell.2.42716.3@gmail.com",
+  "branden.rowland@yahoo.com",
+  "g.r.eg...ki.m.me.lma.n@gmail.com",
+  "br.i.a.n.partridge3.2@gmail.com",
+  "b.rianp.a.r.tr.id.ge3.2@gmail.com",
+  "g.oe.g41@gmail.com",
+]);
+
+export function isFakeSignupEmail(email, website = "") {
+  if (String(website || "").trim()) return true;
+
+  const normalized = String(email || "").trim().toLowerCase();
+  if (!normalized.includes("@")) return false;
+  if (KNOWN_FAKE_SIGNUP_EMAILS.has(normalized)) return true;
+
+  const [localPart, domain] = normalized.split("@");
+  const isGmail = domain === "gmail.com" || domain === "googlemail.com";
+  if (!isGmail) return false;
+
+  const dotCount = (localPart.match(/\./g) || []).length;
+  if (localPart.includes("..")) return true;
+  if (dotCount >= 3) return true;
+  if (dotCount >= 2 && /\d/.test(localPart)) return true;
+  return false;
+}
+
 export function classifyContactSubmission({ firstName, lastName, company, email, message, website }) {
-  if (String(website || "").trim()) {
+  if (String(website || "").trim() || isFakeSignupEmail(email)) {
     return "spam";
   }
 
