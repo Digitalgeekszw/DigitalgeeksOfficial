@@ -41,6 +41,12 @@ async function connectDB() {
     throw e;
   }
 
+  import("../utils/cleanupFakeEmails")
+    .then(({ cleanupFakeEmailsOnce }) => cleanupFakeEmailsOnce())
+    .catch((error) => {
+      console.error("Fake email cleanup failed:", error);
+    });
+
   return cached.conn;
 }
 
