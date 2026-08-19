@@ -6,14 +6,17 @@ import { MdOutlineLocationOn, MdCheckCircle, MdError, MdArrowForward } from "rea
 import { socialMedia } from "./constants";
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     firstName: "",
     lastName: "",
     company: "",
     email: "",
     phone: "",
     message: "",
-  });
+    website: "",
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
 
   const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'success' | 'error'
   const [errorMessage, setErrorMessage] = useState("");
@@ -42,7 +45,7 @@ export default function ContactForm() {
       }
 
       setStatus("success");
-      setFormData({ firstName: "", lastName: "", company: "", email: "", phone: "", message: "" });
+      setFormData(emptyForm);
     } catch (err) {
       setStatus("error");
       setErrorMessage(err.message);
@@ -246,6 +249,19 @@ export default function ContactForm() {
                         className={inputClasses('phone')}
                       />
                     </div>
+                  </div>
+
+                  <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      type="text"
+                      name="website"
+                      id="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formData.website}
+                      onChange={handleChange}
+                    />
                   </div>
 
                   <div className="relative pt-2">

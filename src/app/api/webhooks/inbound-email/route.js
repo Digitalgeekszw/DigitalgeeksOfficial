@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "../../../../lib/mongodb";
 import ReceivedEmail from "../../../../models/ReceivedEmail";
 import { Resend } from "resend";
+import { classifyInboundEmail } from "../../../../utils/spamFilter";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -26,6 +27,20 @@ export async function POST(req) {
     }
 
     console.log("Fetched Email Data:", JSON.stringify(emailData, null, 2));
+
+    const inboundClass = classifyInboundEmail({
+      from,
+      subject,
+      text: emailData.text,
+      html: emailData.html,
+    });
+
+    if (inboundClass !== "inbox") {
+      return NextResponse.json(
+        { message: `Ignored ${inboundClass} email`, email_id },
+        { status: 200 }
+      );
+    }
 
     await connectDB();
 

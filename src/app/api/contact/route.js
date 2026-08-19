@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "../../../lib/mongodb";
 import Contact from "../../../models/Contact";
 import { Resend } from "resend";
+import { classifyContactSubmission, getClientIp, isRateLimited } from "../../../utils/spamFilter";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -13,6 +14,20 @@ export async function POST(req) {
       return NextResponse.json(
         { message: "First name, last name, email, and message are required." },
         { status: 400 }
+      );
+    }
+
+    if (isRateLimited(getClientIp(req))) {
+      return NextResponse.json(
+        { message: "Too many inquiries. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    if (classifyContactSubmission(body) === "spam") {
+      return NextResponse.json(
+        { message: "Inquiry submitted successfully" },
+        { status: 201 }
       );
     }
 
