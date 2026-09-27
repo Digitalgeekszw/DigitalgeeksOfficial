@@ -81,29 +81,20 @@ export default function ContactForm() {
 
       <div className="relative z-10 max-w-[1300px] mx-auto px-6 sm:px-16 flex flex-col lg:flex-row gap-16 lg:gap-24 items-center align-middle">
         
-        {/* ── Left: Premium Typed Intro ────────────────────────── */}
-        <motion.div 
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex-1 flex flex-col pt-0 lg:pt-10"
-        >
+        {/* ── Left: Intro ──────────────────────────────────────── */}
+        <div className="dg-reveal flex-1 flex flex-col pt-0 lg:pt-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10 shadow-sm mb-8 w-fit">
-            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-blue-400" />
             <span className="font-poppins font-medium text-sm text-slate-300 tracking-wide uppercase">
               Start a project
             </span>
           </div>
 
-          <h2 className="font-poppins font-extrabold text-[44px] sm:text-[64px] text-white leading-[1.05] tracking-tight mb-8">
-            Let's build the <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">
-              future together.
-            </span>
+          <h2 className="font-display font-bold text-[40px] sm:text-[56px] text-white leading-[1.05] tracking-[-0.03em] mb-8">
+            Tell us what you&rsquo;re building.
           </h2>
           <p className="font-poppins font-light text-slate-400 text-[19px] sm:text-[22px] leading-[1.7] mb-14 max-w-lg">
-            Our engineering team is ready to help you navigate the journey from idea to industry-defining product. No sales pitches, just pure engineering focus.
+            Whether you have a product idea, a project for our team or a question about DigitalGeeks, send us a message and we&rsquo;ll get back to you.
           </p>
 
           <div className="flex flex-col gap-8">
@@ -137,22 +128,21 @@ export default function ContactForm() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* ── Right: Premium Glassmorphism Form ────────────────── */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="flex-1 w-full max-w-2xl mx-auto lg:mx-0 relative"
+        {/* ── Right: Form ───────────────────────────────────────── */}
+        <div
+          className="dg-reveal flex-1 w-full max-w-2xl mx-auto lg:mx-0 relative"
+          style={{ "--dg-reveal-delay": "200ms" }}
         >
           {/* Subtle glow behind the form */}
           <div className="absolute inset-0 bg-blue-600/20 blur-3xl rounded-[3rem] pointer-events-none" />
 
           <div className="relative bg-white p-8 sm:p-14 rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] border border-white/20">
             
-            <AnimatePresence mode="wait">
+            {/* initial={false}: the form renders visible on first paint (and
+                without JS); only the switch to and from the success state animates. */}
+            <AnimatePresence mode="wait" initial={false}>
               {status === "success" ? (
                 <motion.div
                   key="success"
@@ -168,9 +158,9 @@ export default function ContactForm() {
                   >
                     <MdCheckCircle className="w-12 h-12" />
                   </motion.div>
-                  <h3 className="font-poppins font-extrabold text-[32px] text-slate-900 mb-4 tracking-tight">Message Received.</h3>
+                  <h3 className="font-poppins font-extrabold text-[32px] text-slate-900 mb-4 tracking-tight">Message received.</h3>
                   <p className="font-poppins text-slate-500 text-lg mb-10 max-w-sm leading-relaxed">
-                    Thank you. One of our lead engineers will evaluate your request and contact you shortly.
+                    Thank you. We&rsquo;ll read your message and get back to you.
                   </p>
                   <button 
                     onClick={() => setStatus("idle")}
@@ -322,7 +312,7 @@ export default function ContactForm() {
                     )}
                   </button>
                   <p className="text-center font-poppins text-xs text-slate-400 mt-4">
-                    Your data is secure and will only be used to contact you regarding your inquiry.
+                    We&rsquo;ll only use your details to reply to your inquiry.
                   </p>
                   
                 </motion.form>
@@ -330,7 +320,7 @@ export default function ContactForm() {
             </AnimatePresence>
             
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import { FaCode, FaMicrophoneAlt, FaUsers } from "react-icons/fa";
 
 const highlights = [
@@ -26,12 +25,9 @@ const highlights = [
 ];
 
 const HighlightCard = ({ icon, title, description, index }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.5, delay: index * 0.15 }}
-    className="flex flex-col items-center text-center p-8 rounded-[20px] bg-white shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-100 transition-all duration-300 relative group"
+  <div
+    className="dg-reveal flex flex-col items-center text-center p-8 rounded-[20px] bg-white shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-100 transition-all duration-300 relative group"
+    style={{ "--dg-reveal-delay": `${index * 150}ms` }}
   >
     <div className="w-[64px] h-[64px] rounded-full bg-blue-50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
       {icon}
@@ -42,17 +38,13 @@ const HighlightCard = ({ icon, title, description, index }) => (
     <p className="font-poppins font-normal text-[16px] text-slate-500 leading-[26px]">
       {description}
     </p>
-  </motion.div>
+  </div>
 );
 
 const CommunityHighlights = () => (
   <section className="flex flex-col relative bg-slate-50/50 py-24 sm:py-32 overflow-hidden items-center px-6">
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="w-full flex flex-col items-center justify-center text-center sm:mb-20 mb-12 relative z-[1] max-w-3xl mx-auto"
+    <div
+      className="dg-reveal w-full flex flex-col items-center justify-center text-center sm:mb-20 mb-12 relative z-[1] max-w-3xl mx-auto"
     >
       <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100/50 rounded-full mb-6 w-fit mx-auto">
         <span className="font-poppins font-semibold text-xs text-secondary uppercase tracking-widest px-2">
@@ -63,9 +55,9 @@ const CommunityHighlights = () => (
         Build, Learn, and Grow Together
       </h2>
       <p className="font-poppins font-normal text-slate-500 text-[18px] sm:text-[20px] leading-[32px] max-w-[700px] mt-6">
-        Whether you are looking to contribute to cutting-edge projects, learn from top minds, or simply meet like-minded tech enthusiasts, there's a place for you here.
+        Whether you want to contribute to real projects, learn from people who build products, or meet other people who enjoy technology, there's a place for you here.
       </p>
-    </motion.div>
+    </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full relative z-[1] max-w-[1280px] mx-auto px-6 lg:px-16">
       {highlights.map((highlight, index) => (

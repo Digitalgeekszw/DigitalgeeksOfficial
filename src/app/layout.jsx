@@ -16,36 +16,65 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const SITE_DESCRIPTION =
+  "DigitalGeeks builds Swipee, ZimSensei and PreciAgro: products that make commerce, education and agriculture work better.";
+
 export const metadata = {
-  title: "Digital Geeks | Leading Tech Innovations & Digital Solutions",
-  description: "Digital Geeks is a premier technology partner specializing in software development, AI, and digital transformation. Discover insights, tutorials, and cutting-edge solutions.",
-  keywords: "technology company, software development, digital transformation, AI, machine learning, cybersecurity, web development, Digital Geeks, tech solutions, digitalgeeks.tech",
-  authors: [{ name: "Digital Geeks" }],
+  title: "DigitalGeeks | Swipee, ZimSensei and PreciAgro",
+  description: SITE_DESCRIPTION,
+  keywords:
+    "DigitalGeeks, Swipee, ZimSensei, PreciAgro, point of sale, inventory, learning copilot, exam practice, agricultural intelligence, digital product development",
+  authors: [{ name: "DigitalGeeks" }],
   metadataBase: new URL("https://www.digitalgeeks.tech"),
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
-    title: "Digital Geeks | Leading Tech Innovations",
-    description: "Empowering businesses through cutting-edge technology and digital excellence.",
+    title: "DigitalGeeks | Built for everyday progress",
+    description: SITE_DESCRIPTION,
     url: "https://www.digitalgeeks.tech",
-    siteName: "Digital Geeks",
-    images: [
-      {
-        url: "/logo.png",
-        width: 800,
-        height: 600,
-      },
-    ],
+    siteName: "DigitalGeeks",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Digital Geeks | Leading Tech Innovations",
-    description: "Empowering businesses through cutting-edge technology and digital excellence.",
-    images: ["/logo.png"],
+    title: "DigitalGeeks | Built for everyday progress",
+    description: SITE_DESCRIPTION,
   },
+};
+
+export const viewport = {
+  themeColor: "#ffffff",
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.digitalgeeks.tech/#organization",
+      name: "DigitalGeeks",
+      url: "https://www.digitalgeeks.tech",
+      logo: "https://www.digitalgeeks.tech/brand/digitalgeeks-wordmark.png",
+      description: SITE_DESCRIPTION,
+      brand: [
+        { "@type": "Brand", name: "Swipee", url: "https://swipeeup.store" },
+        { "@type": "Brand", name: "ZimSensei", url: "https://zimsensei.com" },
+        { "@type": "Brand", name: "PreciAgro", url: "https://preciagro.com" },
+      ],
+      sameAs: [
+        "https://www.facebook.com/digitalgeeksz",
+        "https://www.instagram.com/digitalgeeksz",
+        "https://www.linkedin.com/company/92799402",
+        "https://x.com/digitalgeeksz",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.digitalgeeks.tech/#website",
+      url: "https://www.digitalgeeks.tech",
+      name: "DigitalGeeks",
+      publisher: { "@id": "https://www.digitalgeeks.tech/#organization" },
+    },
+  ],
 };
 
 export default function RootLayout({ children }) {
@@ -53,13 +82,12 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${inter.variable} ${plusJakartaSans.variable} dark`}>
       <head>
         <link rel="icon" type="image/ico" href="/Icon.ico" />
-        <meta name="theme-color" content="#000000" />
         {/* Google Tag Manager */}
         <Script
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src={`https://www.googletagmanager.com/gtag/js?id=G-TBZ878WQYY`}
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag() {
@@ -69,31 +97,9 @@ export default function RootLayout({ children }) {
             gtag("config", "G-TBZ878WQYY");
           `}
         </Script>
-        {/* Structured Data Markup */}
-        <Script
-          id="structured-data"
+        <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Digital Geeks",
-              "url": "https://www.digitalgeeks.tech",
-              "logo": "https://www.digitalgeeks.tech/Icon.ico",
-              "description": "Digital Geeks is a leading technology company providing insights on digital topics and building world-class software.",
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "telephone": "",
-                "contactType": "customer service"
-              },
-              "sameAs": [
-                "https://www.facebook.com/digitalgeeksz",
-                "https://www.instagram.com/digitalgeeksz",
-                "https://www.linkedin.com/company/92799402",
-                "https://x.com/digitalgeeksz"
-              ]
-            })
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
       <body>

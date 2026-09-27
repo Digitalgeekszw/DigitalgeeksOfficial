@@ -1624,11 +1624,15 @@ function ZimsenseiPilotSection() {
 
 // ─── Content Management ───────────────────────────────────────────────────
 const CONTENT_POSITIONS = [
-  { key: "hero-video", label: "Home: Hero Video", type: "video" },
+  { key: "product-swipee-checkout", label: "Home — Swipee: checkout screen (real phone screenshot, portrait)", type: "image" },
+  { key: "product-swipee-summary", label: "Home — Swipee: business summary screen (real phone screenshot, portrait)", type: "image" },
+  { key: "product-zimsensei-feedback", label: "Home — ZimSensei: feedback screen (real screenshot, 16:10)", type: "image" },
+  { key: "product-preciagro-interaction", label: "Home — PreciAgro: product interaction (real screenshot, 16:10)", type: "image" },
   { key: "about-hero-image", label: "About Page: Hero Banner", type: "image" },
-  { key: "about-team-image", label: "Home — About section: Team Photo", type: "image" },
-  { key: "showcase-showcase-1-image", label: "Home — Innovation: Preciagro card", type: "image" },
-  { key: "showcase-showcase-2-image", label: "Home — Innovation: Sanaganai card", type: "image" },
+  { key: "about-team-image", label: "About page: Team Photo", type: "image" },
+  { key: "hero-video", label: "Legacy: old homepage hero video (not currently shown)", type: "video" },
+  { key: "showcase-showcase-1-image", label: "Legacy: Preciagro showcase card (not currently shown)", type: "image" },
+  { key: "showcase-showcase-2-image", label: "Legacy: Sanaganai showcase card (not currently shown)", type: "image" },
   { key: "community-hero-image", label: "Community page: Hero image", type: "image" },
   { key: "community-culture-video", label: "Community page: Culture section video", type: "video" },
   { key: "team-hero-image", label: "Team page: Hero image", type: "image" },

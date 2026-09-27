@@ -21,9 +21,8 @@ const CardDeal = () => {
         <p className={`${styles.paragraph} max-w-[470px] mt-5`}>
           Digital Geeks is a community-driven company that brings together
           passionate developers to collaborate, innovate, and excel. Our
-          supportive environment encourages knowledge sharing, while industry
-          partnerships and engaging events create valuable opportunities for
-          growth. We value every voice and strive to create a vibrant community
+          supportive environment encourages knowledge sharing, and events
+          create opportunities to learn and grow. We value every voice and strive to create a vibrant community
           that thrives on creativity and excellence.
         </p>
 

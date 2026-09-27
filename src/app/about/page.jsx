@@ -17,7 +17,7 @@ export default function AboutPage() {
 
       <PageHero 
         title="About DigitalGeeks" 
-        subtitle="Learn about our vision, mission, and the core values that drive our team towards digital excellence." 
+        subtitle="The company behind Swipee, ZimSensei and PreciAgro." 
         imageSrc="/images/summit.png"
         cmsImageKey="about-hero-image"
       />

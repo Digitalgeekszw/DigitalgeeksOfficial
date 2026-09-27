@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+/* Inter and Plus Jakarta Sans are self-hosted through next/font in app/layout.jsx. */
 
 @tailwind base;
 @tailwind components;
@@ -8,14 +8,97 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* ── DigitalGeeks design tokens ─────────────────────────────────────── */
+  /* Brand values sampled from the official logo (src/assets/logo.png). */
+  --dg-blue: #1877f2;         /* logo blue — marks and accents */
+  --dg-blue-strong: #0f63d6;  /* AA-safe blue for text links and buttons on light */
+  --dg-blue-soft: #5aa0ff;    /* AA-safe blue on dark surfaces */
+  --dg-orange: #f9a230;       /* logo orange — sparing accents only */
+  --dg-green: #00d800;        /* logo dot green — decorative dots only */
+
+  --dg-ink: #0a0b0d;
+  --dg-ink-2: #2b3038;
+  --dg-ink-3: #5b6472;        /* ≥5.4:1 on white and surface-2 */
+  --dg-line: #e3e5e9;
+  --dg-surface: #ffffff;
+  --dg-surface-2: #f5f5f7;
+  --dg-surface-warm: #faf7f2;
+  --dg-dark: #0a0b0d;
+  --dg-on-dark: #f5f6f8;
+  --dg-on-dark-2: #a1a7b3;    /* 8:1 on dark */
+
+  /* Layout */
+  --dg-content: 1240px;
+  --dg-gutter: clamp(20px, 5vw, 48px);
+  --dg-section-y: clamp(64px, 10vw, 136px);
+  --dg-nav-h: 64px;
+
+  /* Radii */
+  --dg-radius-sm: 10px;
+  --dg-radius-md: 16px;
+  --dg-radius-lg: 24px;
+
+  /* Type scale (fluid) */
+  --dg-text-hero: clamp(2.5rem, 1.6rem + 4.6vw, 5.5rem);      /* 40 → 88px */
+  --dg-text-h2: clamp(2rem, 1.45rem + 2.6vw, 4rem);           /* 32 → 64px */
+  --dg-text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);     /* 20 → 26px */
+  --dg-text-lead: clamp(1.0625rem, 0.98rem + 0.4vw, 1.3125rem); /* 17 → 21px */
+  --dg-text-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);     /* 16 → 18px */
+
+  /* Motion */
+  --dg-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dg-dur: 700ms;
+  --dg-dur-fast: 180ms;
+}
+
+html {
+  scroll-padding-top: var(--dg-nav-h);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   @apply bg-primary text-slate-800 font-sans;
 }
 
-* {
-  scroll-behavior: smooth;
+/* ── Reveal-on-scroll ────────────────────────────────────────────────────
+   Content is only hidden once RevealObserver has confirmed JS is running and
+   the visitor has not asked for reduced motion, so it stays visible if
+   scripts or animations fail. The reveal transition only applies until the
+   reveal has played, then the element's own transitions take over. */
+.dg-reveal-ready .dg-reveal:not([data-revealed]) {
+  opacity: 0;
+  transform: translateY(16px);
+}
+/* Only the reveal animates; hiding below-the-fold content is instant. */
+.dg-reveal-ready .dg-reveal[data-revealed]:not([data-reveal-done]) {
+  transition:
+    opacity var(--dg-dur) var(--dg-ease) var(--dg-reveal-delay, 0ms),
+    transform var(--dg-dur) var(--dg-ease) var(--dg-reveal-delay, 0ms);
+}
+
+.dg-focus:focus-visible,
+.dg-site a:focus-visible,
+.dg-site button:focus-visible {
+  outline: 2px solid var(--dg-blue-strong);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.dg-on-dark a:focus-visible,
+.dg-on-dark button:focus-visible {
+  outline-color: var(--dg-blue-soft);
+}
+
+.dg-balance {
+  text-wrap: balance;
+}
+.dg-pretty {
+  text-wrap: pretty;
 }
 
 .text-gradient {

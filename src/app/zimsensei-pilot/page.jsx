@@ -66,12 +66,7 @@ export default function ZimsenseiPilot() {
           <div className={`${styles.boxWidth} flex flex-col lg:flex-row gap-16 items-center`}>
             
             {/* Left Content */}
-            <motion.div 
-              className="flex-1 text-center lg:text-left"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
+            <div className="dg-reveal flex-1 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium mb-6">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
                 Launching in 2 Weeks
@@ -98,14 +93,12 @@ export default function ZimsenseiPilot() {
                   Past Paper Magic
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Right Content - Form */}
-            <motion.div 
-              className="flex-1 w-full max-w-md lg:max-w-none"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            <div
+              className="dg-reveal flex-1 w-full max-w-md lg:max-w-none"
+              style={{ "--dg-reveal-delay": "200ms" }}
             >
               <div className="bg-white rounded-[24px] p-8 sm:p-10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
@@ -122,17 +115,17 @@ export default function ZimsenseiPilot() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Full Name</label>
+                          <label htmlFor="pilot-name" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Full Name</label>
                           <input 
-                            required type="text" name="name" value={formData.name} onChange={handleChange}
+                            required type="text" id="pilot-name" name="name" value={formData.name} onChange={handleChange}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900"
                             placeholder="John Doe"
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Phone Number</label>
+                          <label htmlFor="pilot-phone" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Phone Number</label>
                           <input 
-                            required type="tel" name="phone" value={formData.phone} onChange={handleChange}
+                            required type="tel" id="pilot-phone" name="phone" value={formData.phone} onChange={handleChange}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900"
                             placeholder="+263..."
                           />
@@ -140,18 +133,18 @@ export default function ZimsenseiPilot() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Email Address</label>
+                        <label htmlFor="pilot-email" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Email Address</label>
                         <input 
-                          required type="email" name="email" value={formData.email} onChange={handleChange}
+                          required type="email" id="pilot-email" name="email" value={formData.email} onChange={handleChange}
                           className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900"
                           placeholder="john@example.com"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">High School</label>
+                        <label htmlFor="pilot-school" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">High School</label>
                         <input 
-                          required type="text" name="school" value={formData.school} onChange={handleChange}
+                          required type="text" id="pilot-school" name="school" value={formData.school} onChange={handleChange}
                           className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900"
                           placeholder="Current School Name"
                         />
@@ -159,9 +152,9 @@ export default function ZimsenseiPilot() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                          <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Qualifications Level</label>
+                          <label htmlFor="pilot-qualifications" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Qualifications Level</label>
                           <select 
-                            required name="qualifications" value={formData.qualifications} onChange={handleChange}
+                            required id="pilot-qualifications" name="qualifications" value={formData.qualifications} onChange={handleChange}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 appearance-none"
                           >
                             <option value="">Select Level</option>
@@ -170,9 +163,9 @@ export default function ZimsenseiPilot() {
                           </select>
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Exam Board</label>
+                          <label htmlFor="pilot-examBoard" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Exam Board</label>
                           <select 
-                            required name="examBoard" value={formData.examBoard} onChange={handleChange}
+                            required id="pilot-examBoard" name="examBoard" value={formData.examBoard} onChange={handleChange}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 appearance-none"
                           >
                             <option value="">Select Board</option>
@@ -184,9 +177,9 @@ export default function ZimsenseiPilot() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Recent Results / Target Grades</label>
+                        <label htmlFor="pilot-results" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Recent Results / Target Grades</label>
                         <textarea 
-                          required name="results" value={formData.results} onChange={handleChange} rows="2"
+                          required id="pilot-results" name="results" value={formData.results} onChange={handleChange} rows="2"
                           className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 resize-none"
                           placeholder="E.g. Mostly A's in mocks, aiming for 15 points..."
                         ></textarea>
@@ -236,7 +229,7 @@ export default function ZimsenseiPilot() {
                   </motion.div>
                 )}
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

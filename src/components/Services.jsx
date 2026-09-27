@@ -127,7 +127,7 @@ const services = [
     icon: MdOutlineRocketLaunch,
     title: "MVP & Startup Launchpad",
     description:
-      "Fast-track your idea to a fundable, scalable product. We scope, design, and ship your MVP in 6–10 weeks with a dedicated sprint team.",
+      "Fast-track your idea to a fundable, scalable product. We scope, design and ship a focused first version with a dedicated sprint team.",
     tags: ["Discovery", "Sprint Teams", "Go-to-Market"],
     highlight: true,
   },
@@ -261,7 +261,9 @@ const Services = () => {
       {/* ── Service Cards Grid ───────────────────────────────────────── */}
       <div className="max-w-[1400px] mx-auto px-6 sm:px-16 pb-24">
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          <AnimatePresence mode="popLayout">
+          {/* initial={false}: cards render visible on first paint (and without JS);
+              only later filter changes animate. */}
+          <AnimatePresence mode="popLayout" initial={false}>
             {filtered.map((service, index) => (
               <ServiceCard key={service.id} service={service} index={index} />
             ))}
@@ -272,20 +274,14 @@ const Services = () => {
       {/* ── Process Strip ────────────────────────────────────────────── */}
       <div className="bg-slate-50 border-y border-slate-100 py-20 mb-10">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
+          <div className="dg-reveal text-center mb-16">
             <h3 className="font-poppins font-bold text-[34px] sm:text-[44px] text-slate-900 tracking-tight">
               How we work
             </h3>
             <p className="font-poppins text-slate-500 text-[18px] mt-4 max-w-xl mx-auto leading-relaxed">
               A clear, transparent process from first conversation to live product.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
@@ -294,13 +290,10 @@ const Services = () => {
               { step: "03", title: "Build & Iterate", desc: "Agile sprints with continuous demos, fast feedback loops, and transparent progress tracking." },
               { step: "04", title: "Launch & Scale", desc: "Production deployment, monitoring, performance tuning, and ongoing support as you grow." },
             ].map((item, i) => (
-              <motion.div
+              <div
                 key={item.step}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex flex-col text-center items-center sm:text-left sm:items-start"
+                className="dg-reveal flex flex-col text-center items-center sm:text-left sm:items-start"
+                style={{ "--dg-reveal-delay": `${i * 100}ms` }}
               >
                 <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-poppins font-bold text-[24px] mb-5 border border-blue-100 shadow-sm">
                   {item.step}
@@ -311,7 +304,7 @@ const Services = () => {
                 <p className="font-poppins text-slate-500 text-[15px] leading-relaxed">
                   {item.desc}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

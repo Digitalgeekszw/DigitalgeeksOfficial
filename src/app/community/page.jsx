@@ -1,7 +1,7 @@
 import React from "react";
 import PageHero from "../../components/PageHero";
 import CardDeal from "../../components/CardDeal";
-import { Navbar, Footer, CTA, Stats, CommunityHighlights, JoinCommunity, Clients } from "../../components";
+import { Navbar, Footer, CTA, CommunityHighlights } from "../../components";
 import styles from "../../style";
 
 export default function CommunityPage() {
@@ -24,20 +24,15 @@ export default function CommunityPage() {
         <div className={`${styles.paddingX} ${styles.flexCenter}`}>
           <div className={`${styles.boxWidth}`}>
             <div className="mt-16">
-              <Stats />
               <CardDeal />
             </div>
           </div>
         </div>
 
         <CommunityHighlights />
-        <JoinCommunity />
 
         <div className={`${styles.paddingX} ${styles.flexCenter}`}>
           <div className={`${styles.boxWidth}`}>
-            <div className="mt-12 mb-12">
-              <Clients />
-            </div>
             <CTA />
             <Footer />
           </div>

@@ -14,8 +14,9 @@ export default function ServicesPage() {
       </div>
 
       <PageHero 
-        title="Our Services" 
-        subtitle="Comprehensive digital solutions designed to accelerate your business growth and transform your vision into reality." 
+        title="Work with DigitalGeeks" 
+        badge="Services"
+        subtitle="Alongside our own products, we work with organisations to design and develop useful digital products." 
         cmsImageKey="services-hero-image"
       />
 
